@@ -1,0 +1,11 @@
+{
+  "appId": "com.freestatecetralbank.com",
+  "appName": "fscb",
+  "bundledWebRuntime": false,
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  }
+}
