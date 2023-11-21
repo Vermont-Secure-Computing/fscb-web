@@ -96,6 +96,21 @@ window.onload = async function() {
         console.error("Unable to make directory", e);
       }
 
+      const userDataExist = await readdir('user.json')
+      //console.log("userDataExist: ", userDataExist)
+      if (!userDataExist) {
+        //console.log("should show user profile form")
+        const userProfile = document.getElementById('user-profile')
+        const aside = document.getElementById('aside')
+        const tabsContent = document.getElementById('tab-contents')
+        userProfile.classList.remove('hidden')
+        aside.classList.add('hidden')
+        tabsContent.classList.add('hidden')
+      } else {
+        USER = await getUserData()
+        //console.log("USER: ", USER)
+      }
+
       const contractCheckResult = await readdir('data.json');
 
       if (contractCheckResult) {
@@ -144,7 +159,7 @@ tabTogglers.forEach(function(toggler) {
             withdrawAmountInput.innerHTML = ""
         }
         if (tabName === "#addbanker") {
-            getBankerData()
+            refreshBankersList()
             // getUserData()
         }
         if (tabName === "#second") {
@@ -182,7 +197,7 @@ async function balanceApi() {
           });
       const allaccount = accounts.data
       for(let i in allaccount) {
-        
+
         try {
             const response = await axios(`https://twigchain.com/ext/getAddress/${allaccount[i].address}`, {
                 method: 'get',
@@ -190,14 +205,14 @@ async function balanceApi() {
                     'Accept': 'application/json'
                 }
                 });
-            
+
             const body = response.data;
             console.log("data responce", body)
             if (body.address) {
                 if (allaccount[i].address === body.address) {
-    
+
                     allaccount[i].balance = body.balance
-                    
+
                     const accounts = await Filesystem.readFile({
                         path: 'data/data.json',
                         directory: Directory.Documents,
@@ -304,10 +319,10 @@ function getAccountDetails(account){
     if (account.hasOwnProperty('id')) {
       let accountList = document.getElementById('accounts-list')
       let accountDetails = document.getElementById('account-details')
-  
+
       accountList.classList.add("hidden")
       accountDetails.classList.remove("hidden")
-  
+
       //accountDetails.innerHTML = ""
       let accountName = document.getElementById('account-name')
       let creatorName = document.getElementById('creator-name')
@@ -316,7 +331,7 @@ function getAccountDetails(account){
       let accountAddress = document.getElementById('account-address')
       let accountRedeemScript = document.getElementById('account-redeem-script')
       let accountCurrency = document.getElementById('account-currency')
-  
+
       accountName.innerHTML = account.contract_name
       creatorName.innerHTML = account.creator_name
       accountEmail.innerHTML = account.creator_email
@@ -324,8 +339,8 @@ function getAccountDetails(account){
       accountAddress.innerHTML = account.address
       accountRedeemScript.innerHTML = account.redeem_script
       accountCurrency.innerHTML = account.currency
-  
-  
+
+
       let tableBody = document.getElementById('account-bankers-list')
       tableBody.innerHTML = ''
       let bankers = account.bankers
@@ -343,17 +358,17 @@ function getAccountDetails(account){
           signature.innerHTML = bankers[x].signature ? bankers[x].signature : 'no signature yet'
         }
       }
-  
+
       // Generate action and withdrawal buttons
       let buttonContainer = document.getElementById('account-buttons')
       buttonContainer.innerHTML = ''
-  
+
       let viewActionsButton = document.createElement('button')
       viewActionsButton.classList.add("inline-flex", "items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-full", "focus:ring-4", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
       viewActionsButton.innerHTML = "Actions"
       let actions = account.signatures
       viewActionsButton.addEventListener("click", function() {listAccountActions(actions);}, false);
-  
+
       let withdrawalButton = document.createElement('button')
       withdrawalButton.classList.add("inline-flex", "items-center", "m-2", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-full", "focus:ring-4", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
       withdrawalButton.innerHTML = "Withdrawal"
@@ -362,11 +377,11 @@ function getAccountDetails(account){
           "redeemscript": account.redeem_script
       }
       withdrawalButton.addEventListener("click", function() {accountWithdrawalFunc(address);}, false);
-  
-  
+
+
       buttonContainer.appendChild(viewActionsButton)
       buttonContainer.appendChild(withdrawalButton)
-  
+
     }
   }
 
@@ -381,24 +396,24 @@ async function accountWithdrawalFunc(address){
     const script = coinjs.script()
     const addressScript = script.decodeRedeemScript(address.redeemscript)
     console.log("redeem script res ", addressScript)
-  
+
     let accountDetails = document.getElementById('account-details')
     let accountWithdrawal = document.getElementById('account-withdrawal')
     let accountActions = document.getElementById('account-actions')
     let unspentdiv = document.getElementById('list-unspent')
-  
+
     // Clear unspent list
     unspentdiv.innerHTML = ""
     unspentAmountTotal = 0
     userInputAmountTotal = 0
     TOTAL_AMOUNT_TO_WITHDRAW = 0
-  
+
     let tx = coinjs.transaction();
     accountDetails.classList.add("hidden")
     accountWithdrawal.classList.remove("hidden")
     accountActions.classList.add("hidden")
-  
-    
+
+
     if (unspentAmountTotal == 0) {
         if (listP) {
             for (let i = 0; i < listP.length; i++) {
@@ -461,7 +476,7 @@ async function accountWithdrawalFunc(address){
                 unspentdiv.appendChild(div)
             }
         }
-        
+
     }
     console.log("total unspent: ", unspentAmountTotal)
     withdrawalFee.value = unspentAmountTotal
@@ -495,7 +510,7 @@ async function unspentApi(address) {
                     'Accept': 'application/json'
                 }
         });
-            
+
         console.log(response)
         if (response.status === 200) {
             return response.data.message.address
@@ -506,31 +521,110 @@ async function unspentApi(address) {
 }
 
 
+/**
+  Create user profile
+**/
+async function createUserProfile(e) {
+    e.preventDefault()
+    const userName = document.getElementById('user-name').value
+    const userEmail = document.getElementById('user-email').value
+
+    /**
+      Validation
+    **/
+    if (userName == '' || userEmail == '') {
+      alertError("Name and email is required.")
+      return
+    } else if (userName.length > 50) {
+      alertError("Name should not be more than 50 characters")
+      return
+    } else if (!isEmailValid) {
+      alertError("Invalid email address")
+      return
+    }
+
+    writeUserData(userName, userEmail)
+}
+
+async function writeUserData(userName, userEmail) {
+
+    const addProfileSubmit = document.getElementById('add-user-profile-btn')
+    const userNameInput = document.getElementById('user-name')
+    const userEmailInput = document.getElementById('user-email')
+
+    addProfileSubmit.disabled = true
+    addProfileSubmit.classList.add('opacity-20')
+    try {
+
+        let userData = {
+          "user_name": userName,
+          "user_email": userEmail
+        }
+        await Filesystem.writeFile({
+            path: 'data/user.json',
+            data: userData,
+            directory: Directory.Documents,
+            encoding: Encoding.UTF8,
+        });
+        addProfileSubmit.disabled = false
+        addProfileSubmit.classList.remove('opacity-20')
+        userNameInput.value = '';
+        userEmailInput.value = '';
+
+        USER = userData
+        const userProfile = document.getElementById('user-profile')
+        const aside = document.getElementById('aside')
+        const tabsContent = document.getElementById('tab-contents')
+        userProfile.classList.add('hidden')
+        aside.classList.remove('hidden')
+        tabsContent.classList.remove('hidden')
+        alertSuccess("Profile has successfully been created")
+
+    } catch (e) {
+        console.log("Writing user data error: ", e)
+    }
+
+}
+
+/**
+  Enable / Disable the add banker submit button
+**/
+function addBankerButton(status) {
+  const addBankerSubmit = document.getElementById('banker-submit-button')
+  if (status === "enable") {
+    addBankerSubmit.disabled = false
+    addBankerSubmit.classList.remove('opacity-20')
+  } else {
+    addBankerSubmit.disabled = true
+    addBankerSubmit.classList.add('opacity-20')
+  }
+}
+
+
 /* add banker function */
 async function addBanker(e) {
     e.preventDefault()
     // const mainBankerDiv = document.getElementById('addbanker')
     const nameInput = document.getElementById('banker-name-add')
     const emailInput = document.getElementById('banker-email-add')
-    const addBankerSubmit = document.getElementById('banker-submit-button')
-    addBankerSubmit.disabled = true
-    addBankerSubmit.classList.add('opacity-20')
+    addBankerButton("disable")
 
     // Get value of selected currency
-    const selectElement = document.querySelector('#coin-currency');
-    const bankerCurrency = selectElement.value;
+    const selectElement = document.querySelector('#banker-coin-currency');
+    const bankerCurrency = selectElement.options[selectElement.selectedIndex].text;
 
     const bankerName = nameInput.value
     const bankerEmail = emailInput.value
     console.log("banker name: ", bankerName)
     console.log("banker email: ", bankerEmail)
-
+    console.log("banker currency: ", bankerCurrency)
     /**
       Add banker form validation
     **/
     if (bankerName == "" || bankerEmail == "") {
       console.log("User name and email is required.")
       alertError("User name and email is required.")
+      addBankerButton("enable")
       return
     }
     if (bankerEmail) {
@@ -538,22 +632,24 @@ async function addBanker(e) {
       if (!validEmail) {
         // console.log("Please enter a valid email")
         alertError("Please enter a valid email")
+        addBankerButton("enable")
         return
       }
     }
     /**
       Check the banker to be add is already in the bankers,json
     **/
-    // if (BANKERS) {
-    //   for(let x in BANKERS) {
-    //       if(BANKERS.hasOwnProperty(x)){
-    //           if (BANKERS[x].banker_name == bankerName && BANKERS[x].banker_email == bankerEmail && BANKERS[x].currency == bankerCurrency) {
-    //             alertError("You are trying to add a banker that is already in the list.")
-    //             return
-    //           }
-    //       }
-    //   }
-    // }
+    if (BANKERS) {
+      for(let x in BANKERS) {
+          if(BANKERS.hasOwnProperty(x)){
+              if (BANKERS[x].banker_name == bankerName && BANKERS[x].banker_email == bankerEmail && BANKERS[x].currency == bankerCurrency) {
+                alertError("You are trying to add a banker that is already in the list.")
+                addBankerButton("enable")
+                return
+              }
+          }
+      }
+    }
 
     if (bankerEmail && bankerName) {
         const getBankerIdNumber = await bankerIdNumber()
@@ -615,14 +711,16 @@ async function writeBankerData(data, idNumber, nameInput, emailInput) {
     } catch (e) {
         console.log(e)
     }
-    
+
 }
 
 function showBankerRequestSend(data) {
     let bankerForm = document.getElementById('add-banker-form')
     let bankersList = document.getElementById('bankers-list')
     let bankerMessage = document.getElementById('banker-message-container')
+    let bankerListContainer = document.getElementById('bankers-list-container')
 
+    bankerListContainer.classList.add('hidden')
     bankerForm.classList.add('hidden')
     bankersList.classList.add('hidden')
     bankerMessage.classList.remove('hidden')
@@ -661,6 +759,16 @@ function showBankerRequestSend(data) {
     p4.innerHTML = JSON.stringify(message, undefined, 2);
     p5.innerHTML = "-----End fscb message-----";
 
+    const copyToClipboardText = p1.innerHTML + '\n' + p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML
+    let copyButton = document.createElement('img')
+    copyButton.setAttribute('src', './assets/imgs/copy_button.png')
+    copyButton.setAttribute('class', 'inline-flex absolute right-10 px-2 cursor-pointer hover:scale-125 transition duration-500')
+    copyButton.addEventListener("click", function() {
+      navigator.clipboard.writeText(copyToClipboardText)
+      alertSuccess("Message successfully copied in clipboard.")
+    }, false);
+
+    div.appendChild(copyButton)
     div.appendChild(p)
     div.appendChild(br)
     div.appendChild(p1)
@@ -676,6 +784,10 @@ function showBankerRequestSend(data) {
     closeButton.classList.add("inline-flex", "items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "absolute", "right-5", "mt-5", "text-white", "bg-orange-500", "rounded-lg", "focus:ring-4", "focus:ring-blue-200", "dark:focus:ring-orange-500", "hover:bg-orange-500")
     closeButton.innerHTML = "Close"
     closeButton.addEventListener("click", function() {
+
+      addBankerButton("enable")
+      refreshBankersList()
+      bankerListContainer.classList.remove('hidden')
       bankerForm.classList.remove('hidden')
       bankersList.classList.remove('hidden')
       bankerMessage.classList.add('hidden')
@@ -686,7 +798,37 @@ function showBankerRequestSend(data) {
     bankerMessage.appendChild(buttonDiv)
 }
 
-async function getBankerData() {
+
+async function getUserData() {
+  try {
+    const contents = await Filesystem.readFile({
+        path: 'data/user.json',
+        directory: Directory.Documents,
+        encoding: Encoding.UTF8,
+      });
+    console.log("user details ", contents)
+    return contents.data
+  }catch(e) {
+    console.log("Error trying to read user.json")
+  }
+}
+
+
+async function getBankers() {
+  try {
+    const contents = await Filesystem.readFile({
+        path: 'data/bankers.json',
+        directory: Directory.Documents,
+        encoding: Encoding.UTF8,
+      });
+    console.log("contents banker ", contents)
+    return contents.data
+  }catch(e) {
+    console.log("Error trying to read bankers.json")
+  }
+}
+
+async function refreshBankersList() {
     const contents = await Filesystem.readFile({
         path: 'data/bankers.json',
         directory: Directory.Documents,
@@ -944,7 +1086,7 @@ async function accountBankerData() {
             el.closest('.selectMultiple').classList.toggle('open');
         });
     });
-    
+
 }
 
 function slicePubkey(pubkey) {
@@ -1025,7 +1167,7 @@ async function readdir(locFile) {
             console.log("false will return")
             return false
         }
-    } 
+    }
     catch(e) {
         console.log('Unable to read dir: ' + e);
     }
@@ -1046,7 +1188,7 @@ async function idNumber() {
                 const jconvert = result.data
                 console.log("contract length: ", jconvert[Object.keys(jconvert)[Object.keys(jconvert).length - 1]].contract_id + 1)
                 return jconvert[Object.keys(jconvert)[Object.keys(jconvert).length - 1]].contract_id + 1
-            }) 
+            })
         } else {
             return 1
         }
@@ -1069,7 +1211,7 @@ async function bankerIdNumber() {
                 const jconvert = result.data
                 console.log("banker length: ", jconvert[Object.keys(jconvert)[Object.keys(jconvert).length - 1]].banker_id + 1)
                 return jconvert[Object.keys(jconvert)[Object.keys(jconvert).length - 1]].banker_id + 1
-            }) 
+            })
         } else {
             return 1
         }
@@ -1213,6 +1355,17 @@ function finalizeNewKeys(evt){
     p5.innerHTML = "-----End fscb message-----";
     // p4.setAttribute("class", "w-10")
     p4.classList.add('whitespace-pre-wrap', 'break-all')
+
+    const copyToClipboardText = p1.innerHTML + '\n' + p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML
+    let copyButton = document.createElement('img')
+    copyButton.setAttribute('src', './assets/imgs/copy_button.png')
+    copyButton.setAttribute('class', 'inline-flex absolute right-10 px-2 cursor-pointer hover:scale-125 transition duration-500')
+    copyButton.addEventListener("click", function() {
+      navigator.clipboard.writeText(copyToClipboardText)
+      alertSuccess("Message successfully copied in clipboard.")
+    }, false);
+
+    div.appendChild(copyButton)
     div.appendChild(p)
     div.appendChild(br)
     div.appendChild(p1)
@@ -1231,7 +1384,7 @@ function isKeyValid(hex) {
     var isValidFormat = /^[0-9a-fA-F]{64}$/.test(key)
     return isValidFormat
   }
-  
+
   function isWifKeyValid(hex) {
     var key = hex.toString();
     var isValidFormat = /^[0-9a-zA-Z]{52}$/.test(key)
@@ -1250,7 +1403,7 @@ async function bankerPubkeyResponse(evt) {
         encoding: Encoding.UTF8,
       });
       console.log("got all bankers ", allbankers)
-      
+
       for (const i in allbankers.data) {
         console.log("i: ", i)
         if (allbankers.data[i].banker_id == evt.banker_id) {
@@ -1362,7 +1515,7 @@ async function contractnew (options) {
         }
       }
     }
-  
+
     let data = {
         "id": Math.floor(1000000000 + Math.random() * 9000000000),
         "contract_id": getIdNumber,
@@ -1425,7 +1578,7 @@ async function contractnew (options) {
     thirdTab.classList.add('hidden')
     fourthTab.classList.add('hidden')
     fifthTab.classList.add('hidden')
-  
+
     let tabContents = document.querySelector("#tab-contents");
     for (let i = 0; i < tabContents.children.length-1; i++) {
       tabTogglers[i].parentElement.classList.remove("bg-gradient-to-l", "from-gray-500");
@@ -1442,15 +1595,15 @@ async function contractnew (options) {
       addressInput.value = DONATION_ADDRESS
     }
   }
-  
+
   function addOrDelete(id) {
       console.log("click add or delete")
       const mainKey = document.getElementById('address-amount')
-  
+
       let div = document.createElement('div');
       div.setAttribute("class", "grid md:grid-cols-4 gap-2");
       div.setAttribute('id', 'address-keys')
-  
+
       let input1 = document.createElement('input')
       input1.setAttribute('class', 'text-base text-black font-normal h-10 col-span-2 mt-2')
       input1.setAttribute('placeholder', 'Enter Address')
@@ -1458,17 +1611,17 @@ async function contractnew (options) {
       // input2.addEventListener('onchange', ()=> {console.log("amount: ", input2.value)})
       input2.setAttribute('class', 'text-base text-black font-normal h-10 col-span-1 mt-2 user-input-amount')
       input2.setAttribute('placeholder', 'Enter Amount')
-  
+
       /**
         Add event listener to the amount input
       **/
       input2.addEventListener('input', () => {amountOnInput(input2.value)})
       input2.addEventListener('change', () => {amountOnchange(input2.value)})
-  
+
       if (id == "donation-address") {
           input1.value = DONATION_ADDRESS
       }
-  
+
       let anchor = document.createElement('a')
       anchor.setAttribute('class', 'red pubkeyRemove cursor-pointer')
       //let minus = document.createElement('object')
@@ -1477,26 +1630,26 @@ async function contractnew (options) {
       minus.setAttribute('width', '50')
       minus.setAttribute('height', '50')
       minus.setAttribute('class', 'red pubkeyRemove')
-  
-  
-  
+
+
+
       div.appendChild(input1)
       div.appendChild(input2)
       div.appendChild(minus)
       mainKey.appendChild(div)
-  
+
       minus.addEventListener('click', (e) => {
         console.log('minus click')
         deleteInput(e)
         if (input2.value) amountOnchangeSubtract(input2.value)
       })
   }
-  
+
   function deleteInput(e) {
       const removeEl = e.target.parentNode;
       const remove = e.target.classList.contains('pubkeyRemove')
       if (!remove) return;
-  
+
       document.getElementById('address-amount').removeChild(removeEl);
   }
 
@@ -1504,7 +1657,7 @@ async function contractnew (options) {
     if (!isNaN(amount)) {
       const getuserinput = document.querySelectorAll('#address-keys')
       let totalOutput = 0
-  
+
       for (let i = 0; i < getuserinput.length; i++) {
         let amount = getuserinput[i].children[1].value
         totalOutput += Number(amount)
@@ -1517,12 +1670,12 @@ async function contractnew (options) {
   function amountOnchange(amount) {
     const getuserinput = document.querySelectorAll('#address-keys')
     let totalOutput = 0
-  
+
     for (let i = 0; i < getuserinput.length; i++) {
       let amount = getuserinput[i].children[1].value
       totalOutput += Number(amount)
     }
-  
+
     //TOTAL_AMOUNT_TO_WITHDRAW += Number(amount)
     TOTAL_AMOUNT_TO_WITHDRAW = totalOutput
     withdrawalFee.value = unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW
@@ -1535,7 +1688,7 @@ async function contractnew (options) {
     console.log("amount to subtract: ", amount)
     console.log("withdrawal fee: ", unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW)
   }
-  
+
   let withdrawAmountInput = document.getElementById('withdraw-amount')
   withdrawAmountInput.addEventListener('input', () => {amountOnInput(withdrawAmountInput.value)})
   withdrawAmountInput.addEventListener('change', () => {amountOnchange(withdrawAmountInput.value)})
@@ -1544,15 +1697,15 @@ async function contractnew (options) {
     e.preventDefault()
     let withdrawFeeInput = document.getElementById("withdraw-fee")
     let userInputtedFee = withdrawFeeInput.value
-  
+
     let change = unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW
     console.log("change: ", change)
-  
+
     if (unspentAmountTotal < TOTAL_AMOUNT_TO_WITHDRAW) {
       alertError("Insufficient balance. Please adjust the withdrawal amount.")
       return
     }
-  
+
     if (userInputtedFee == change) {
       if (change > 0.001) {
         let text = "Current transaction fee is high. If you want to proceed, click Ok";
@@ -1571,7 +1724,7 @@ async function contractnew (options) {
       let amountToChangeAddress = unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW - userInputtedFee
       generateClaim(amountToChangeAddress)
     }
-  
+
   }
 
   async function generateClaim(changeAmount) {
@@ -1621,11 +1774,11 @@ async function contractnew (options) {
     for (let i = 0; i < getuserinput.length; i++) {
       let address = getuserinput[i].children[0].value
       let amount = getuserinput[i].children[1].value
-  
+
       userinputindex = i
       userinputsum += Number(amount)
       console.log(address, amount)
-  
+
       let isValidAddress = coinjs.addressDecode(address)
       if (isValidAddress == false) {
         alertError("Address is not valid")
@@ -1634,20 +1787,20 @@ async function contractnew (options) {
         tx.addoutput(address, amount)
       }
     }
-  
+
     // if (changeAddressinput) {
     //   console.log("changeAddressinput amount: ", changeAddressinput.children[1].value)
     //   console.log("changeAddressinput address: ", changeAddressinput.children[0].value)
     //   userinputsum += changeAddressinput.children[1].value
     //   tx.addoutput(changeAddressinput.children[0].value, changeAddressinput.children[1].value)
     // }
-  
+
     /**
       Add a change address to the tx.addoutput if change is greater than withdrawal fee
     **/
     console.log("unspentindexsum: ", unspentindexsum)
     console.log("userinputsum: ", userinputsum)
-  
+
     /**
       Disabled automatic addition of change address
     **/
@@ -1660,7 +1813,7 @@ async function contractnew (options) {
       tx.addoutput(CHANGE_ADDRESS, changeAmount)
     }
     /**End of automatically adding change address**/
-  
+
     if (userunspentindex === getunspent.length -1 && userinputindex === getuserinput.length -1) {
       let accountDetails = document.getElementById('account-details')
       let accountWithdrawal = document.getElementById('account-withdrawal')
@@ -1683,14 +1836,14 @@ async function contractnew (options) {
       console.log("tx size: ", tx.size())
       let inputs = deserializeTx.ins
       let outputs = deserializeTx.outs
-  
+
       for (let i = 0; i < inputs.length; i++) {
         var s = deserializeTx.extractScriptKey(i);
         let input = inputs[i]
         console.log("s: ", s.script)
         console.log("N: ", input.outpoint.index)
         console.log(input.outpoint.hash)
-  
+
         // let row = inputsTable.insertRow();
         // let txid = row.insertCell(0);
         // txid.innerHTML = input.outpoint.hash
@@ -1728,16 +1881,16 @@ async function contractnew (options) {
         script.appendChild(inputs3)
         script.setAttribute('width', '45%')
       }
-  
+
       for (let i = 0; i < outputs.length; i++) {
-  
+
         let output = outputs[i]
           console.log("output: ", output)
         if(output.script.chunks.length==2 && output.script.chunks[0]==106){ // OP_RETURN
-  
+
           var data = Crypto.util.bytesToHex(output.script.chunks[1]);
           var dataascii = hex2ascii(data);
-  
+
           if(dataascii.match(/^[\s\d\w]+$/ig)){
             data = dataascii;
           }
@@ -1755,7 +1908,7 @@ async function contractnew (options) {
           script.innerHTML = Crypto.util.bytesToHex(output.script.buffer)
           script.setAttribute('width', '45%')
         } else {
-  
+
           var addr = '';
           if(output.script.chunks.length==5){
             addr = coinjs.scripthash2address(Crypto.util.bytesToHex(output.script.chunks[2]));
@@ -1767,7 +1920,7 @@ async function contractnew (options) {
             addr = coinjs.scripthash2address(Crypto.util.bytesToHex(output.script.chunks[1]));
             coinjs.pub = pub;
           }
-  
+
           console.log("address: ", addr)
           console.log("amount: ", (output.value/100000000).toFixed(8))
           console.log("script: ", Crypto.util.bytesToHex(output.script.buffer))
@@ -1787,18 +1940,18 @@ async function contractnew (options) {
     //     console.log(evt)
     //     accountSigFilter = evt
     //   })
-  
+
       const generateButton = document.getElementById('generate-request-signature-message')
       generateButton.addEventListener('click', function() {
         requestSignatureWindow(txRedeemTransaction, accountSigFilter)
       }, false)
     }
-  
-  
+
+
     // if (userinputsum > unspentindexsum) {
     //   alertError("You are spending more than you have")
     // }
-  
+
   }
 
   async function getredeemscriptRedeemscript(options) {
@@ -1866,6 +2019,18 @@ async function contractnew (options) {
     p15.innerHTML = '"contract_name":' + '"' + accountParse[0].contract_name + '",'
     const p16 = document.createElement('p')
     p16.innerHTML = "-----End fscb message-----"
+
+    const copyToClipboardText = p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML + '\n' + p6.innerHTML + '\n' + p7.innerHTML + '\n' + p8.innerHTML + '\n' + p9.innerHTML + '\n' + p10.innerHTML + '\n' + p11.innerHTML + '\n' + p12.innerHTML + '\n' + p13.innerHTML + '\n' + p14.innerHTML + '\n' + p15.innerHTML
+     + '\n' + p16.innerHTML + '\n' + p17.innerHTML
+    let copyButton = document.createElement('img')
+    copyButton.setAttribute('src', './images/copy_button.png')
+    copyButton.setAttribute('class', 'inline-flex absolute right-10 px-4 cursor-pointer hover:scale-125 transition duration-500')
+    copyButton.addEventListener("click", function() {
+      navigator.clipboard.writeText(copyToClipboardText)
+      alertSuccess("Message successfully copied in clipboard.")
+    }, false);
+
+    messageSignature.appendChild(copyButton)
     messageSignature.appendChild(p1)
     messageSignature.appendChild(br)
     messageSignature.appendChild(br)
@@ -1901,7 +2066,7 @@ async function contractnew (options) {
 
 formCreateAccount.addEventListener("submit", saveAndCreateText);
 importTextForm.addEventListener('submit', parseTextArea);
-// userProfileForm.addEventListener('submit', createUserProfile);
+userProfileForm.addEventListener('submit', createUserProfile);
 withdrawalAddBtn.addEventListener('click', () => {addOrDelete('address-keys')});
 // //minusButton.addEventListener('click', deleteInput);
 formAddBanker.addEventListener('submit', addBanker);
