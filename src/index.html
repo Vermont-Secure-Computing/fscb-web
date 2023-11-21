@@ -562,7 +562,7 @@
               </select>
               <input type="text" id="banker-name-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-2" placeholder="Bankers Name">
               <input type="email" id="banker-email-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-email-add absoulte mt-2" placeholder="Bankers Email">
-              <button type="submit" class="inline-flex items-center px-10 py-3 text-base font-medium text-center text-white bg-orange-500 focus:ring-4 focus:ring-orange-500 dark:focus:bg-orange-500 hover:bg-orange absolute mt-5 right-10 rounded-full">Submit</button>
+              <button type="submit" id="banker-submit-button" class="inline-flex items-center px-10 py-3 text-base font-medium text-center text-white bg-orange-500 focus:ring-4 focus:ring-orange-500 dark:focus:bg-orange-500 hover:bg-orange absolute mt-5 right-10 rounded-full">Submit</button>
             </form>
 
             <div class="mx-auto hidden font-normal text-base" id="banker-message-container">
@@ -640,9 +640,9 @@
           </div>
         </div>
       </div>
-      <div id="user-profile" class="hidden h-screen bg-[#1a1a1a]">
-        <form id="user-profile-form" class="relative text-white left-44 p-1 pl-48">
-          <div class="mt-16 pl-7">
+      <div id="user-profile" class="hidden h-screen bg-[#1a1a1a] flex justify-center items-center">
+        <form id="user-profile-form" class="text-white">
+          <div class="pl-7">
             <img src="./assets/imgs/fscb_logo_round.png" alt="fscb">
           </div>
            <div class="font-semibold mt-8">
@@ -650,7 +650,7 @@
            </div>
           <input input type="text" id="user-name" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block relative w-96 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-2" placeholder="Username">
           <input input type="email" id="user-email" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block relative w-96 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-2" placeholder="Users E-mail">
-          <button type="submit" class="items-center relative px-40 py-3 text-md font-medium text-center text-white bg-orange-500 focus:ring-4 focus:ring-orange-500 dark:focus:bg-orange-500 hover:bg-orange mt-5 ml-2 rounded-full">Submit</button>
+          <button id="add-user-profile-btn" type="submit" class="items-center relative px-40 py-3 text-md font-medium text-center text-white bg-orange-500 focus:ring-4 focus:ring-orange-500 dark:focus:bg-orange-500 hover:bg-orange mt-5 ml-2 rounded-full">Submit</button>
         </form>
       </div>
     </div>
