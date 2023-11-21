@@ -1,4 +1,5 @@
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import axios from 'axios';
 import Toastify from 'toastify-js'
 
 
@@ -118,6 +119,7 @@ tabTogglers.forEach(function(toggler) {
         openTab = tabName;
         if (tabName === "#first") {
             // ipcRenderer.send("balance:api", {"send": "get"})
+            balanceApi()
             let accountList = document.getElementById('accounts-list')
             let accountDetails = document.getElementById('account-details')
             let accountActions = document.getElementById('account-actions')
@@ -163,6 +165,71 @@ tabTogglers.forEach(function(toggler) {
         e.target.parentElement.classList.add("bg-gradient-to-l", "from-gray-500");
     });
 });
+
+/* get balance from api */
+async function balanceApi() {
+    // e.preventDefault()
+    // console.log(options)
+    // let account = {};
+    // const fileName = "data.json"
+    // const path = "data"
+    const contractCheckResult = await readdir('data.json');
+    if (contractCheckResult) {
+        const accounts = await Filesystem.readFile({
+            path: 'data/data.json',
+            directory: Directory.Documents,
+            encoding: Encoding.UTF8,
+          });
+      const allaccount = accounts.data
+      for(let i in allaccount) {
+        
+        try {
+            const response = await axios(`https://twigchain.com/ext/getAddress/${allaccount[i].address}`, {
+                method: 'get',
+                headers: {
+                    'Accept': 'application/json'
+                }
+                });
+            
+            const body = response.data;
+            console.log("data responce", body)
+            if (body.address) {
+                if (allaccount[i].address === body.address) {
+    
+                    allaccount[i].balance = body.balance
+                    
+                    const accounts = await Filesystem.readFile({
+                        path: 'data/data.json',
+                        directory: Directory.Documents,
+                        encoding: Encoding.UTF8,
+                      });
+                    if (accounts.data) {
+                        const jdata = accounts.data
+                        jdata[i] = allaccount[i]
+                        const writeAccount = await Filesystem.writeFile({
+                            path: 'data/data.json',
+                            data: jdata,
+                            directory: Directory.Documents,
+                            encoding: Encoding.UTF8,
+                        });
+                        if (writeAccount.uri) {
+                            const readmore = await Filesystem.readFile({
+                                path: 'data/data.json',
+                                directory: Directory.Documents,
+                                encoding: Encoding.UTF8,
+                              });
+                            listfile(readmore)
+                        }
+                    }
+                }
+            }
+
+        } catch (e) {
+            console.log(e)
+        }
+    }
+  }
+}
 
 /**
   Helper functions
@@ -226,32 +293,216 @@ async function listfile(evt) {
             //viewAccountDetailsButton.addEventListener('click', getAccountDetails)
             let details = convertToJson[x]
             viewAccountDetailsButton.addEventListener("click", function() {getAccountDetails(details);}, false);
-            // ipcRenderer.on('response:balance', function(e, arg) {
-            //     console.log(e)
-            //     if (e.error) {
-            //         balance.innerHTML = 0
-            //     } else {
-            //         balance.innerHTML = e
-            //     }
-            //     // ipcRenderer.removeAllListeners('get:balance');
-            //     // ipcRenderer.removeAllListeners('response:balance');
-            //     // ipcRenderer.removeAllListeners('list:file');
-            // })
-
-            // if(convertToJson.hasOwnProperty(x)){
-            //     console.log(convertToJson[x].contract_name)
-            //     // text+="<td>" + convertToJson[x].email + "</td>"
-            // }
-            // ipcRenderer.removeAllListeners('get:balance');
-            // ipcRenderer.removeAllListeners('response:balance');
-            // ipcRenderer.removeAllListeners('list:file');
         }
     }
-    // accountTr.appendChild(accountTd)
-    // accountTr.appendChild(accountTd1)
-    // accountTr.appendChild(accountTd2)
-    // accountBody.appendChild(accountTr)
 
+}
+
+/* account detail view */
+function getAccountDetails(account){
+    console.log("get account details: ", account)
+    if (account.hasOwnProperty('id')) {
+      let accountList = document.getElementById('accounts-list')
+      let accountDetails = document.getElementById('account-details')
+  
+      accountList.classList.add("hidden")
+      accountDetails.classList.remove("hidden")
+  
+      //accountDetails.innerHTML = ""
+      let accountName = document.getElementById('account-name')
+      let creatorName = document.getElementById('creator-name')
+      let accountEmail = document.getElementById('account-email')
+      let accountBalance = document.getElementById('account-balance')
+      let accountAddress = document.getElementById('account-address')
+      let accountRedeemScript = document.getElementById('account-redeem-script')
+      let accountCurrency = document.getElementById('account-currency')
+  
+      accountName.innerHTML = account.contract_name
+      creatorName.innerHTML = account.creator_name
+      accountEmail.innerHTML = account.creator_email
+      accountBalance.innerHTML = account.balance
+      accountAddress.innerHTML = account.address
+      accountRedeemScript.innerHTML = account.redeem_script
+      accountCurrency.innerHTML = account.currency
+  
+  
+      let tableBody = document.getElementById('account-bankers-list')
+      tableBody.innerHTML = ''
+      let bankers = account.bankers
+      for(let x in bankers) {
+        if(bankers.hasOwnProperty(x)){
+          let pubkey = slicePubkey(bankers[x].pubkey)
+          let row = tableBody.insertRow();
+          let name = row.insertCell(0);
+          name.innerHTML = bankers[x].banker_name
+          let email = row.insertCell(1);
+          email.innerHTML = bankers[x].banker_email
+          let publicKey = row.insertCell(2);
+          publicKey.innerHTML = pubkey
+          let signature = row.insertCell(3);
+          signature.innerHTML = bankers[x].signature ? bankers[x].signature : 'no signature yet'
+        }
+      }
+  
+      // Generate action and withdrawal buttons
+      let buttonContainer = document.getElementById('account-buttons')
+      buttonContainer.innerHTML = ''
+  
+      let viewActionsButton = document.createElement('button')
+      viewActionsButton.classList.add("inline-flex", "items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-full", "focus:ring-4", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
+      viewActionsButton.innerHTML = "Actions"
+      let actions = account.signatures
+      viewActionsButton.addEventListener("click", function() {listAccountActions(actions);}, false);
+  
+      let withdrawalButton = document.createElement('button')
+      withdrawalButton.classList.add("inline-flex", "items-center", "m-2", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-full", "focus:ring-4", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
+      withdrawalButton.innerHTML = "Withdrawal"
+      let address = {
+          "address": account.address,
+          "redeemscript": account.redeem_script
+      }
+      withdrawalButton.addEventListener("click", function() {accountWithdrawalFunc(address);}, false);
+  
+  
+      buttonContainer.appendChild(viewActionsButton)
+      buttonContainer.appendChild(withdrawalButton)
+  
+    }
+  }
+
+/**
+  Owner view - Account withdrawal
+**/
+async function accountWithdrawalFunc(address){
+    console.log("withdrawal: ", address.address)
+    CHANGE_ADDRESS = address.address
+    // ipcRenderer.send("unspent:api", address.address)
+    const listP = await unspentApi(address.address)
+    const script = coinjs.script()
+    const addressScript = script.decodeRedeemScript(address.redeemscript)
+    console.log("redeem script res ", addressScript)
+  
+    let accountDetails = document.getElementById('account-details')
+    let accountWithdrawal = document.getElementById('account-withdrawal')
+    let accountActions = document.getElementById('account-actions')
+    let unspentdiv = document.getElementById('list-unspent')
+  
+    // Clear unspent list
+    unspentdiv.innerHTML = ""
+    unspentAmountTotal = 0
+    userInputAmountTotal = 0
+    TOTAL_AMOUNT_TO_WITHDRAW = 0
+  
+    let tx = coinjs.transaction();
+    accountDetails.classList.add("hidden")
+    accountWithdrawal.classList.remove("hidden")
+    accountActions.classList.add("hidden")
+  
+    
+    if (unspentAmountTotal == 0) {
+        if (listP) {
+            for (let i = 0; i < listP.length; i++) {
+                console.log(listP[i].txid)
+                unspentAmountTotal += listP[i].amount / 100000000
+                // let row = tableBody.insertRow()
+                // let transactionId = row.insertCell(0)
+                // transactionId.innerHTML = listP[i].txid.substring(0,30)+"..."
+                // let vout = row.insertCell(1)
+                // vout.innerHTML = listP[i].vout
+                // let script = row.insertCell(2)
+                // script.innerHTML = addressScript.redeemscript.substring(0,20)+"..."
+                // let amount = row.insertCell(3)
+                // amount.innerHTML = listP[i].amount
+                // tx.addinput(listP[i].txid, listP[i].vout, addressScript.redeemscript, null)
+                // tx.addoutput("WdBb5rTtXjDYGHBZvXHbhxyUar1n7RA1VJ", 1.99)
+                // console.log("tx log test: ", tx.serialize())
+                let div = document.createElement('div')
+                div.setAttribute('id', 'inner-unspent')
+                div.setAttribute('class', 'grid md:grid-cols-4 gap-3')
+                let input1 = document.createElement('input')
+                input1.setAttribute('class', 'col-span-2 txid-withdraw text-black')
+                input1.setAttribute('id', 'txid-withdraw')
+                input1.value = listP[i].txid
+                let input2 = document.createElement('input')
+                input2.setAttribute('class', 'text-black')
+                input2.setAttribute('class', 'hidden')
+                input2.setAttribute('id', 'vout-withdraw')
+                input2.value = listP[i].vout
+                let input3 = document.createElement('input')
+                input3.setAttribute('class', 'text-black')
+                input3.setAttribute('class', 'hidden')
+                input3.setAttribute('id', 'script-withdraw')
+                input3.value = addressScript.redeemscript
+                let input4 = document.createElement('input')
+                input4.setAttribute('class', 'col-span-1 text-black')
+                input4.setAttribute('id', 'amount-withdraw')
+                input4.value = listP[i].amount / 100000000
+                let input5 = document.createElement('input')
+                input5.setAttribute('class', 'hidden')
+                input5.value = address.redeemscript
+                let check = document.createElement('input')
+                check.setAttribute('type', 'checkbox')
+                check.setAttribute('checked', '')
+                check.addEventListener('change', (e, evt) => {
+                console.log("e testing ", e)
+                console.log("evt testing ", evt)
+                if(e.target.defaultChecked) {
+                    check.removeAttribute('checked', '')
+                } else {
+                    check.setAttribute('checked', '')
+                }
+                })
+                div.appendChild(input1)
+                div.appendChild(input2)
+                div.appendChild(input3)
+                div.appendChild(input4)
+                div.appendChild(input5)
+                div.appendChild(check)
+                unspentdiv.appendChild(div)
+            }
+        }
+        
+    }
+    console.log("total unspent: ", unspentAmountTotal)
+    withdrawalFee.value = unspentAmountTotal
+
+  }
+
+async function unspentApi(address) {
+    console.log("ipc main address: ", address)
+    try {
+        // const request = https.request(`https://api.logbin.org/api?address=${address}`, (response) => {
+        // console.log("im here")
+        // let data = '';
+        // response.on('data', (chunk) => {
+        //     data = data + chunk.toString();
+        // });
+
+        // response.on('end', async () => {
+        //     const body = await JSON.parse(data);
+        //     console.log("unspent body: ", body.message.address)
+        //     win.webContents.send('unspent:address', body.message.address)
+        // });
+        // })
+
+        // request.on('error', (error) => {
+        //     console.log('An error', error);
+        // });
+        // request.end()
+        const response = await axios(`https://api.logbin.org/api?address=${address}`, {
+                method: 'get',
+                headers: {
+                    'Accept': 'application/json'
+                }
+        });
+            
+        console.log(response)
+        if (response.status === 200) {
+            return response.data.message.address
+        }
+    } catch(e) {
+        console.log("error : ", e)
+    }
 }
 
 
@@ -1183,10 +1434,475 @@ async function contractnew (options) {
     accountListTab.classList.add("bg-gradient-to-l", "from-gray-500");
   }
 
+  function addDonationAddress() {
+    const addressInput = document.getElementById('withdraw-address')
+    if (addressInput.value) {
+      addOrDelete('donation-address')
+    } else {
+      addressInput.value = DONATION_ADDRESS
+    }
+  }
+  
+  function addOrDelete(id) {
+      console.log("click add or delete")
+      const mainKey = document.getElementById('address-amount')
+  
+      let div = document.createElement('div');
+      div.setAttribute("class", "grid md:grid-cols-4 gap-2");
+      div.setAttribute('id', 'address-keys')
+  
+      let input1 = document.createElement('input')
+      input1.setAttribute('class', 'text-base text-black font-normal h-10 col-span-2 mt-2')
+      input1.setAttribute('placeholder', 'Enter Address')
+      let input2 = document.createElement('input')
+      // input2.addEventListener('onchange', ()=> {console.log("amount: ", input2.value)})
+      input2.setAttribute('class', 'text-base text-black font-normal h-10 col-span-1 mt-2 user-input-amount')
+      input2.setAttribute('placeholder', 'Enter Amount')
+  
+      /**
+        Add event listener to the amount input
+      **/
+      input2.addEventListener('input', () => {amountOnInput(input2.value)})
+      input2.addEventListener('change', () => {amountOnchange(input2.value)})
+  
+      if (id == "donation-address") {
+          input1.value = DONATION_ADDRESS
+      }
+  
+      let anchor = document.createElement('a')
+      anchor.setAttribute('class', 'red pubkeyRemove cursor-pointer')
+      //let minus = document.createElement('object')
+      let minus = document.createElement('img')
+      minus.setAttribute('src', './assets/imgs/minus.svg')
+      minus.setAttribute('width', '50')
+      minus.setAttribute('height', '50')
+      minus.setAttribute('class', 'red pubkeyRemove')
+  
+  
+  
+      div.appendChild(input1)
+      div.appendChild(input2)
+      div.appendChild(minus)
+      mainKey.appendChild(div)
+  
+      minus.addEventListener('click', (e) => {
+        console.log('minus click')
+        deleteInput(e)
+        if (input2.value) amountOnchangeSubtract(input2.value)
+      })
+  }
+  
+  function deleteInput(e) {
+      const removeEl = e.target.parentNode;
+      const remove = e.target.classList.contains('pubkeyRemove')
+      if (!remove) return;
+  
+      document.getElementById('address-amount').removeChild(removeEl);
+  }
+
+  function amountOnInput(amount) {
+    if (!isNaN(amount)) {
+      const getuserinput = document.querySelectorAll('#address-keys')
+      let totalOutput = 0
+  
+      for (let i = 0; i < getuserinput.length; i++) {
+        let amount = getuserinput[i].children[1].value
+        totalOutput += Number(amount)
+      }
+      TOTAL_AMOUNT_TO_WITHDRAW = totalOutput
+      withdrawalFee.value = unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW
+    }
+  }
+
+  function amountOnchange(amount) {
+    const getuserinput = document.querySelectorAll('#address-keys')
+    let totalOutput = 0
+  
+    for (let i = 0; i < getuserinput.length; i++) {
+      let amount = getuserinput[i].children[1].value
+      totalOutput += Number(amount)
+    }
+  
+    //TOTAL_AMOUNT_TO_WITHDRAW += Number(amount)
+    TOTAL_AMOUNT_TO_WITHDRAW = totalOutput
+    withdrawalFee.value = unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW
+  }
+
+  function amountOnchangeSubtract(amount) {
+
+    TOTAL_AMOUNT_TO_WITHDRAW -= Number(amount)
+    withdrawalFee.value = unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW
+    console.log("amount to subtract: ", amount)
+    console.log("withdrawal fee: ", unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW)
+  }
+  
+  let withdrawAmountInput = document.getElementById('withdraw-amount')
+  withdrawAmountInput.addEventListener('input', () => {amountOnInput(withdrawAmountInput.value)})
+  withdrawAmountInput.addEventListener('change', () => {amountOnchange(withdrawAmountInput.value)})
+
+  function checkTxFee(e) {
+    e.preventDefault()
+    let withdrawFeeInput = document.getElementById("withdraw-fee")
+    let userInputtedFee = withdrawFeeInput.value
+  
+    let change = unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW
+    console.log("change: ", change)
+  
+    if (unspentAmountTotal < TOTAL_AMOUNT_TO_WITHDRAW) {
+      alertError("Insufficient balance. Please adjust the withdrawal amount.")
+      return
+    }
+  
+    if (userInputtedFee == change) {
+      if (change > 0.001) {
+        let text = "Current transaction fee is high. If you want to proceed, click Ok";
+        if (confirm(text) == true) {
+          generateClaim(0)
+        } else {
+          console.log("The confirmation modal is cancelled.")
+        }
+      } else {
+        generateClaim(0)
+      }
+    } else if (userInputtedFee > change) {
+      alertError("Transaction fee is greater than remaining amount. Please adjust.")
+    } else if (userInputtedFee < change) {
+      console.log("should generate change address")
+      let amountToChangeAddress = unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW - userInputtedFee
+      generateClaim(amountToChangeAddress)
+    }
+  
+  }
+
+  async function generateClaim(changeAmount) {
+    //e.preventDefault()
+    // const txid = document.getElementById('txid-withdraw').value
+    // const vout = document.getElementById('vout-withdraw').value
+    // const script = document.getElementById('script-withdraw').value
+    // const amount = document.getElementById('amount-withdraw').value
+    // const address = document.getElementById('withdraw-address').value
+    // const amountWithdraw = document.getElementById('withdraw-amount').value
+    // console.log("txid ", txid)
+    // console.log('address ', address)
+    // let tx = coinjs.transaction();
+    // let scriptN = coinjs.script()
+    // tx.addinput(txid, vout, script, amount, null)
+    // tx.addoutput(address, amountWithdraw)
+    // const out = await tx.serialize()
+    // console.log("tx serialize", out)
+    // console.log("decode tx serialize", tx.deserialize(out))
+    let tx = coinjs.transaction()
+    const getunspent = document.querySelectorAll('#inner-unspent')
+    const getuserinput = document.querySelectorAll('#address-keys')
+    //const changeAddressinput = document.getElementById('change-address')
+    let userunspentindex;
+    let userinputindex;
+    let unspentindexsum = 0;
+    let userinputsum = 0 ;
+    let txRedeemTransaction;
+    let accountSigFilter;
+    let inputsTable = document.getElementById('banker-verify-inputs-initial')
+    let outputsTable = document.getElementById('banker-verify-outputs-initial')
+    console.log("get unspent", getunspent)
+    for(let i = 0; i < getunspent.length; i++) {
+      if(getunspent[i].children[5].defaultChecked) {
+        userunspentindex = i
+        console.log(getunspent[i].children[3].value)
+        unspentindexsum += Number(getunspent[i].children[3].value)
+        tx.addinput(getunspent[i].children[0].value, getunspent[i].children[1].value, getunspent[i].children[2].value, null)
+      }
+      // if(i === getunspent.length -1) {
+      //   tx.addoutput(address, amountWithdraw)
+      //   const out = await tx.serialize()
+      //   console.log(out)
+      // }
+    }
+    console.log(getuserinput)
+    for (let i = 0; i < getuserinput.length; i++) {
+      let address = getuserinput[i].children[0].value
+      let amount = getuserinput[i].children[1].value
+  
+      userinputindex = i
+      userinputsum += Number(amount)
+      console.log(address, amount)
+  
+      let isValidAddress = coinjs.addressDecode(address)
+      if (isValidAddress == false) {
+        alertError("Address is not valid")
+        return
+      } else {
+        tx.addoutput(address, amount)
+      }
+    }
+  
+    // if (changeAddressinput) {
+    //   console.log("changeAddressinput amount: ", changeAddressinput.children[1].value)
+    //   console.log("changeAddressinput address: ", changeAddressinput.children[0].value)
+    //   userinputsum += changeAddressinput.children[1].value
+    //   tx.addoutput(changeAddressinput.children[0].value, changeAddressinput.children[1].value)
+    // }
+  
+    /**
+      Add a change address to the tx.addoutput if change is greater than withdrawal fee
+    **/
+    console.log("unspentindexsum: ", unspentindexsum)
+    console.log("userinputsum: ", userinputsum)
+  
+    /**
+      Disabled automatic addition of change address
+    **/
+    // let change = unspentindexsum - userinputsum
+    // console.log("change: ", change)
+    // let change_amount = change - WITHDRAWAL_FEE
+    // console.log("change_amount: ", change_amount)
+    if (changeAmount) {
+      console.log('add ouput: ', CHANGE_ADDRESS, changeAmount)
+      tx.addoutput(CHANGE_ADDRESS, changeAmount)
+    }
+    /**End of automatically adding change address**/
+  
+    if (userunspentindex === getunspent.length -1 && userinputindex === getuserinput.length -1) {
+      let accountDetails = document.getElementById('account-details')
+      let accountWithdrawal = document.getElementById('account-withdrawal')
+      let accountActions = document.getElementById('account-actions')
+      let withdrawalReference = document.getElementById('withdraw-reference')
+      accountDetails.classList.add('hidden')
+      accountWithdrawal.classList.add('hidden')
+      accountActions.classList.add('hidden')
+      withdrawalReference.classList.remove('hidden')
+      txRedeemTransaction = tx.serialize();
+      // console.log("redeem script", getunspent[0].children[4].value)
+    //   ipcRenderer.send('getredeemscript:redeemscript', {"script": getunspent[0].children[4].value});
+      const sigScript = {
+        "script": getunspent[0].children[4].value
+      }
+      accountSigFilter = await getredeemscriptRedeemscript(sigScript)
+      const deserializeTx = tx.deserialize(tx.serialize())
+      console.log("deserialize tx: ", deserializeTx)
+      console.log("txRedeemTransaction: ", txRedeemTransaction)
+      console.log("tx size: ", tx.size())
+      let inputs = deserializeTx.ins
+      let outputs = deserializeTx.outs
+  
+      for (let i = 0; i < inputs.length; i++) {
+        var s = deserializeTx.extractScriptKey(i);
+        let input = inputs[i]
+        console.log("s: ", s.script)
+        console.log("N: ", input.outpoint.index)
+        console.log(input.outpoint.hash)
+  
+        // let row = inputsTable.insertRow();
+        // let txid = row.insertCell(0);
+        // txid.innerHTML = input.outpoint.hash
+        // txid.setAttribute('width', '45%')
+        // let indexNo = row.insertCell(1);
+        // indexNo.innerHTML = input.outpoint.index
+        // indexNo.setAttribute('width', '10%')
+        // let script = row.insertCell(2);
+        // script.innerHTML = s.script
+        // script.setAttribute('width', '45%')
+        let inputs1 = document.createElement('input')
+        inputs1.setAttribute('readonly', true)
+        inputs1.setAttribute('class', 'md:flex px-3 bg-gray-300 text-black h-10 left-96 py-2 w-96');
+        inputs1.value = input.outpoint.hash
+        let row = inputsTable.insertRow();
+        let txid = row.insertCell(0);
+        // txid.innerHTML = input.outpoint.hash
+        txid.appendChild(inputs1)
+        txid.setAttribute('width', '45%')
+        let inputs2 = document.createElement('input')
+        inputs2.setAttribute('readonly', true)
+        inputs2.setAttribute('class', 'text-black text-center');
+        inputs2.value = input.outpoint.index
+        let indexNo = row.insertCell(1);
+        indexNo.setAttribute('class', 'text-center bg-white text-black font-semibold')
+        indexNo.innerHTML = input.outpoint.index
+        // indexNo.appendChild(inputs2)
+        indexNo.setAttribute('width', '10%')
+        let inputs3 = document.createElement('input')
+        inputs3.setAttribute('readonly', true)
+        inputs3.setAttribute('class', 'md:flex bg-gray-300 pl-1 h-10 text-black px-3 py-2 w-full');
+        inputs3.value = s.script
+        let script = row.insertCell(2);
+        // script.innerHTML = s.script
+        script.appendChild(inputs3)
+        script.setAttribute('width', '45%')
+      }
+  
+      for (let i = 0; i < outputs.length; i++) {
+  
+        let output = outputs[i]
+          console.log("output: ", output)
+        if(output.script.chunks.length==2 && output.script.chunks[0]==106){ // OP_RETURN
+  
+          var data = Crypto.util.bytesToHex(output.script.chunks[1]);
+          var dataascii = hex2ascii(data);
+  
+          if(dataascii.match(/^[\s\d\w]+$/ig)){
+            data = dataascii;
+          }
+          console.log("address: ", data)
+          console.log("amount: ", (output.value/100000000).toFixed(8))
+          console.log("script: ", Crypto.util.bytesToHex(output.script.buffer))
+          let row = outputsTable.insertRow();
+          let address = row.insertCell(0);
+          address.innerHTML = data
+          address.setAttribute('width', '45%')
+          let amount = row.insertCell(1);
+          amount.innerHTML = (output.value/100000000).toFixed(8)
+          amount.setAttribute('width', '10%')
+          let script = row.insertCell(2);
+          script.innerHTML = Crypto.util.bytesToHex(output.script.buffer)
+          script.setAttribute('width', '45%')
+        } else {
+  
+          var addr = '';
+          if(output.script.chunks.length==5){
+            addr = coinjs.scripthash2address(Crypto.util.bytesToHex(output.script.chunks[2]));
+          } else if((output.script.chunks.length==2) && output.script.chunks[0]==0){
+            addr = coinjs.bech32_encode(coinjs.bech32.hrp, [coinjs.bech32.version].concat(coinjs.bech32_convert(output.script.chunks[1], 8, 5, true)));
+          } else {
+            var pub = coinjs.pub;
+            coinjs.pub = coinjs.multisig;
+            addr = coinjs.scripthash2address(Crypto.util.bytesToHex(output.script.chunks[1]));
+            coinjs.pub = pub;
+          }
+  
+          console.log("address: ", addr)
+          console.log("amount: ", (output.value/100000000).toFixed(8))
+          console.log("script: ", Crypto.util.bytesToHex(output.script.buffer))
+          let row = outputsTable.insertRow();
+          let address = row.insertCell(0);
+          address.setAttribute('width', '45%')
+          address.innerHTML = addr
+          let amount = row.insertCell(1);
+          amount.innerHTML = (output.value/100000000).toFixed(8)
+          amount.setAttribute('width', '10%')
+          let script = row.insertCell(2);
+          script.innerHTML = Crypto.util.bytesToHex(output.script.buffer)
+          script.setAttribute('width', '45%')
+        }
+      }
+    //   ipcRenderer.on('account:filterSig', (e, evt) => {
+    //     console.log(evt)
+    //     accountSigFilter = evt
+    //   })
+  
+      const generateButton = document.getElementById('generate-request-signature-message')
+      generateButton.addEventListener('click', function() {
+        requestSignatureWindow(txRedeemTransaction, accountSigFilter)
+      }, false)
+    }
+  
+  
+    // if (userinputsum > unspentindexsum) {
+    //   alertError("You are spending more than you have")
+    // }
+  
+  }
+
+  async function getredeemscriptRedeemscript(options) {
+    console.log("options script: ", options.script)
+    const accounts = await Filesystem.readFile({
+        path: 'data/data.json',
+        directory: Directory.Documents,
+        encoding: Encoding.UTF8,
+      });
+    const accountFilter = Object.values(accounts.data).filter(value => {
+      console.log(value);
+      return value.redeem_script === options.script;
+    });
+    console.log("account filter: ", accountFilter)
+    return accountFilter
+    // win.webContents.send('account:filterSig', JSON.stringify(accountFilter))
+  };
+
+  function requestSignatureWindow(tx, account) {
+    let accountDetails = document.getElementById('account-details')
+    let accountWithdrawal = document.getElementById('account-withdrawal')
+    let accountActions = document.getElementById('account-actions')
+    let withdrawalReference = document.getElementById('withdraw-reference')
+    let sendSignature = document.getElementById('send-signature')
+    let messageSignature = document.getElementById('request-sig-message')
+    accountDetails.classList.add('hidden')
+    accountWithdrawal.classList.add('hidden')
+    accountActions.classList.add('hidden')
+    withdrawalReference.classList.add('hidden')
+    sendSignature.classList.remove('hidden')
+    console.log("tx: ", tx)
+    console.log("account: ", typeof(account))
+    const accountParse = account
+    console.log("account parse: ", accountParse)
+    const br = document.createElement('br')
+    const p1 = document.createElement('p')
+    p1.innerHTML = "Please copy the line below and send it to" + " " + accountParse[0].bankers[0].banker_email
+    const p2 = document.createElement('p')
+    p2.innerHTML = accountParse[0].creator_name + " is requesting for your banker signature at this " + accountParse[0].contract_name
+    const p3 = document.createElement('p')
+    p3.innerHTML = "Please copy the message inside and import in FSCB"
+    const p4 = document.createElement('p')
+    p4.innerHTML = "-----Begin fscb message-----"
+    const p5 = document.createElement('p')
+    p5.innerHTML = "{" + '"header":"free_state_central_bank",'
+    const p6 = document.createElement('p')
+    p6.innerHTML = '"message": "request-signature",'
+    const p7 = document.createElement('p')
+    p7.innerHTML = '"id":' + '"' + accountParse[0].id + '",'
+    const p8 = document.createElement('p')
+    p8.innerHTML = '"banker_id":' + accountParse[0].bankers[0].banker_id + ','
+    const p9 = document.createElement('p')
+    p9.innerHTML = '"creator_name":' + '"' + accountParse[0].creator_name + '",'
+    const p10 = document.createElement('p')
+    p10.innerHTML = '"creator_email":' + '"' + accountParse[0].creator_email + '",'
+    const p11 = document.createElement('p')
+    p11.innerHTML = '"banker_name":' + '"' + accountParse[0].bankers[0].banker_name + '",'
+    const p12 = document.createElement('p')
+    p12.innerHTML = '"banker_email":' + '"' + accountParse[0].bankers[0].banker_email + '",'
+    const p13 = document.createElement('p')
+    p13.innerHTML = '"transaction_id_for_signature":' + '"' + tx + '",'
+    const p14 = document.createElement('p')
+    p14.innerHTML = '"currency":' + '"' + accountParse[0].currency + '"}'
+    const p15 = document.createElement('p')
+    p15.innerHTML = '"contract_name":' + '"' + accountParse[0].contract_name + '",'
+    const p16 = document.createElement('p')
+    p16.innerHTML = "-----End fscb message-----"
+    messageSignature.appendChild(p1)
+    messageSignature.appendChild(br)
+    messageSignature.appendChild(br)
+    messageSignature.appendChild(p2)
+    messageSignature.appendChild(p3)
+    messageSignature.appendChild(p4)
+    messageSignature.appendChild(p5)
+    messageSignature.appendChild(p6)
+    messageSignature.appendChild(p7)
+    messageSignature.appendChild(p15)
+    messageSignature.appendChild(p8)
+    messageSignature.appendChild(p9)
+    messageSignature.appendChild(p10)
+    messageSignature.appendChild(p11)
+    messageSignature.appendChild(p12)
+    messageSignature.appendChild(p13)
+    messageSignature.appendChild(p14)
+    messageSignature.appendChild(p16)
+    const data = {
+      "banker_id": accountParse[0].bankers[0].banker_id,
+      "banker_name": accountParse[0].bankers[0].banker_name,
+      "date_requested": Date.now(),
+      "date_signed": null,
+      "status": "PENDING",
+      "transaction_id": "",
+      "action": "Request for signature"
+    }
+    console.log("action data: ", data)
+    accountParse[0].signatures.push(data)
+    // ipcRenderer.send('signature:encode', {"id": accountParse[0].contract_id, "contract": accountParse[0]})
+    // console.log("new account parse", JSON.stringify(accountParse[0]))
+  }
+
 formCreateAccount.addEventListener("submit", saveAndCreateText);
 importTextForm.addEventListener('submit', parseTextArea);
 // userProfileForm.addEventListener('submit', createUserProfile);
-// withdrawalAddBtn.addEventListener('click', () => {addOrDelete('address-keys')});
+withdrawalAddBtn.addEventListener('click', () => {addOrDelete('address-keys')});
 // //minusButton.addEventListener('click', deleteInput);
 formAddBanker.addEventListener('submit', addBanker);
 // getbankerClick.addEventListener('click', getBanker)
@@ -1194,6 +1910,6 @@ formAddBanker.addEventListener('submit', addBanker);
 importTextButton.addEventListener('click', openImportTextTab)
 // getbankerClick.addEventListener('click', getBanker);
 // getListClick.addEventListener('click', getList);
-// formWithdraw.addEventListener('submit', generateClaim);
-// donateBtn.addEventListener('click', addDonationAddress);
+formWithdraw.addEventListener('submit', checkTxFee);
+donateBtn.addEventListener('click', addDonationAddress);
 // exportBtn.addEventListener('click', exportJsonData);

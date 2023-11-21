@@ -39,14 +39,14 @@
     <link rel="stylesheet" href="./css/style.css" />
     <meta name="theme-color" content="#31d53d" />
   </head>
-  <body>
+  <body class="bg-black">
     <div>
 
-      <div class="rounded border mx-auto grid h-auto grid-cols-12">
-        <aside class="col-span-3 bg-black" id="aside">
+      <div class="mx-auto grid h-auto grid-cols-12">
+        <aside class="col-span-3" id="aside">
           <div>
-          <img src="./assets/imgs/Group 28.png" alt="fscb">
-          <button id="import-text-button" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center absolute left-20 -mt-16  text-black bg-gray-300 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-gray-300 hover:bg-gray-300">Import Text</button>
+          <img src="./assets/imgs/fscb_logo.png" alt="fscb">
+          <button id="import-text-button" class="inline-flex items-center px-10 py-2.5 text-base font-medium text-center absolute left-16 -mt-16  text-black bg-gray-300 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-gray-300 hover:bg-gray-300">Import Text</button>
           </div>
           <!-- <div class="ml-5 w-1"> -->
             <!-- <label
@@ -61,7 +61,9 @@
           <!-- Tabs -->
           <ul class='list-outside list-disc ml-12 mt-12 h-96'>
             <ul id="tabs">
-              <li class="list-disc marker:text-orange-500 -mt-0 px-4 text-white font-semibold text-xl py-2 rounded-t" id="account-list-tab"><a class="getlistClick" href="#first">Account List</a></li>
+              <li class="list-disc marker:text-orange-500 -mt-0 px-4 text-white font-semibold text-xl py-2 rounded-t" id="account-list-tab">
+                <a class="getlistClick" href="#first">Account List</a>
+              </li>
               <hr class="bg-gray-500 opacity-10 dark:opacity-50"/>
               <li class="list-disc marker:text-red-500 px-4 text-white font-semibold text-xl py-2 rounded-t"><a class="getbankerClick" href="#second">New Account</a></li>
               <hr class="bg-gray-500 opacity-10 dark:opacity-50"/>
@@ -70,12 +72,10 @@
               <li class="list-disc marker:text-green-500 px-4 text-white font-semibold text-xl py-2 rounded-t"><a href="#third">Instructions</a></li>
               <hr class="bg-gray-500 opacity-10 dark:opacity-50"/>
               <li class="list-disc marker:text-purple-500 px-4 text-white font-semibold text-xl py-2 rounded-t"><a href="#fourth">About FSCB</a></li>
-              <hr class="bg-gray-500 opacity-10 dark:opacity-50"/>
-              <li class="list-disc marker:text-yellow-500 px-4 text-white font-semibold text-xl py-2 rounded-t"><a href="#fifth">How it works</a></li>
+              <!-- <hr class="bg-gray-500 opacity-10 dark:opacity-50"/>
+              <li class="list-disc marker:text-yellow-500 px-4 text-white font-semibold text-xl py-2 rounded-t"><a href="#fifth">How it works</a></li> -->
               <hr class="bg-gray-500 opacity-10 dark:opacity-50"/>
               <li class="list-disc marker:text-gray-800 px-4 text-white font-semibold text-xl py-2 rounded-t"><a href="#sixth">Backup</a></li>
-              <hr class="bg-gray-500 opacity-10 dark:opacity-50"/>
-              <li class="list-disc marker:text-teal-300 px-4 text-white font-semibold text-xl py-2 rounded-t"><a href="#seventh">Restore</a></li>
             </ul>
           </ul>
         </aside>
@@ -84,7 +84,9 @@
         <!-- Tab Contents -->
         <div class="bg-[#1a1a1a] col-span-9 h-auto" id="tab-contents" >
           <div id="importText" class="hidden p-4">
-            <div class="mx-auto" id="import-area">
+            <div class="mx-auto max-h-80" id="import-area">
+              <p class="text-xl text-white font-bold">Welcome to FSCB</p>
+              <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
               <form id="import-text-form">
                 <textarea name="" id="import-text" cols="30" rows="10" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Paste text here..."></textarea>
                 <button type="submit" class="inline-flex items-center px-12 py-3 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Import</button>
@@ -102,9 +104,9 @@
               <p class="text-xl text-white font-bold">Request for Withdrawal Signature</p>
               <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
               <p class="text-l text-white my-1" id="sign-request-title"></p>
-              <div id="owner-message-sign-request-body">
-                <div id="owner-message-sign-request-close-button"></div>
+              <div id="owner-message-sign-request-body" class="max-h-[420px] overflow-y-auto">
               </div>
+              <div id="owner-message-sign-request-close-button"></div>
             </div>
             <!--End of Owners view - Message to send - Signature request-->
 
@@ -116,7 +118,7 @@
               <div id="owner-withdrawal-txid-body">
                 <div class="text-white my-1">
                   <p>TxID</p>
-                  <div id="owner-withdrawal-txid-for-broadcast" class="break-all p2"></div>
+                  <div id="owner-withdrawal-txid-for-broadcast" class="break-all p2 bg-white p-8 text-black font-normal text-base mt-8 max-h-[360px]"></div>
                 </div>
 
                 <!-- Successful withdrawal broadcast -->
@@ -131,9 +133,9 @@
                   <span class="block sm:inline" id="owner-withdrawal-error-response"></span>
                 </div>
 
-                <div id="owner-withdrawal-txid-buttons">
-                  <button id="owner-withdrawal-broadcast-button" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Broadcast</button>
-                  <button id="owner-withdrawal-close-button" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Close</button>
+                <div id="owner-withdrawal-txid-buttons" class="flex justify-end gap-2">
+                  <button id="owner-withdrawal-broadcast-button" class="items-center px-5 py-2.5 text-sm font-medium text-center mt-5  text-white bg-orange-500 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Broadcast</button>
+                  <button id="owner-withdrawal-close-button" class="items-center px-5 py-2.5 text-sm font-medium text-center mt-5  text-white bg-orange-500 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Close</button>
                 </div>
               </div>
             </div>
@@ -155,7 +157,10 @@
                 <div class="mt-20 text-base font-bold"><p>WIF Private Key</p></div>
                 <input type="text" id="pivkey-wif" disabled class="col-span-3 bg-[#AAE8BD] border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
 
-                <input type="text" id="pubkey-compressed" hidden>
+                <div class="mt-8 text-base font-bold"><p>Public Key</p></div>
+                <input type="text" id="pubkey-compressed" disabled class="col-span-3 bg-[#AAE8BD] border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+
+                <!--input type="text" id="pubkey-compressed" hidden-->
 
                 <div class="mt-4">
                   <p>WARNING</p>
@@ -207,10 +212,11 @@
                   </tbody>
                 </table>
               </div>
-              <div>
+              <div class="mt-8">
+                <p>Enter WIF Private key</p>
                 <input type="text" id="banker-pivkey-for-signature" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
               </div>
-              <button id="banker-sign-button" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Sign</button>
+              <button id="banker-sign-button" class="inline-flex items-center px-10 py-2.5 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Sign</button>
             </div>
             <!--End of Bankers View - Verify Withdrawal-->
 
@@ -219,18 +225,55 @@
               <p class="text-xl text-white font-bold">Response to Withdrawal Signature request</p>
               <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
               <p class="text-l text-white my-1" id="sign-response-title"></p>
-              <div id="banker-message-signtx-body">
-                <div id="banker-message--signtx-close-button"></div>
+              <div class="bg-white font-normal text-base p-8 max-h-[420px] overflow-y-auto" id="banker-message-signtx-body">
               </div>
+              <div id="banker-message-signtx-close-button"></div>
             </div>
             <!--End of Bankers view - Message to send - Sign tx Response-->
 
+            <!--Owners view - Next banker for signature -->
+            <div id="request-sig-next-banker-select" class="hidden">
+              <p class="text-xl text-white font-bold">Select banker</p>
+              <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
+              <div id="bankers-has-signed">
+                <div class="mt-8">
+                  <p class="text-base text-white">Bankers with signature</p>
+                </div>
+                <table id="signed-bankers-list" class="relative w-full pl-96 flex-col border-collapse border border-slate-400 text-center text-sm font-light text-black bg-white mt-4">
+                  <thead class="border-b font-medium dark:border-neutral-950">
+                    <tr>
+                      <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-100"/>
+                      <th scope="col" class="px-6 py-2">Name</th>
+                      <th scope="col" class="px-6 py-2">Date Signed</th>
+                      <th scope="col" class="px-6 py-2">Signature</th>
+                    </tr>
+                  </thead>
+                  <tbody class="text-black bg-white" id="signed-bankers-list-body">
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="col-span-12 mt-4 text-gray-500 text-xs font-semibold py-1 m-1 relative w-full" id="next-banker-to-sign-container">
+                <select
+                  class="text-black font-normal text-sm relative h-10 col-span-2 block w-full p-2 mt-1"
+                  name="bankers-to-sign"
+                  id="select-next-bankers-to-sign"
+                >
+                </select>
+              </div>
+              <button id="generate-next-sign-message" class="inline-flex items-center px-12 py-3 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Generate</button>
+            </div>
+            <!-- End of Owners view - Next banker for signature-->
+
           </div>
           <div id="first" class="p-9 text-white font-bold text-xl leading-relaxed">
-            Account list
-              <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
             <div id="accounts-list">
-              <table class="relative w-full border-collapse border border-slate-400 text-center text-base font-light text-black bg-white left-1 mt-4">
+              Account list
+              <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
+              <div class="flex justify-end mb-3">
+                <button id="refresh-account-list" class="items-center px-4 py-1 text-sm font-medium text-center text-white bg-green-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-green-500 hover:bg-green-500">Refresh</button>
+              </div>
+              <table class="relative w-full border-collapse border border-slate-400 text-left text-sm font-normal text-black bg-white left-1">
                 <thead class="relative w-full border-b pr-2 font-medium text-black dark:border-neutral-500">
                   <tr>
                     <th scope="col" class="border border-slate-500 px-6 py-2">Account Name</th>
@@ -245,10 +288,10 @@
             </div>
             <div id="account-details" class="hidden font-normal text-base text-black bg-white h-64">
               <p class="pl-4 text-2xl font-bold">Account details</p>
-              <div aria-colcount="mt-4" id="main-container">
+              <div aria-colcount="mt-2" id="main-container">
                 <div class="mt-5 px-4" id="left-container">
                   <p class="mt-1"><span>Account Name: </span><span id="account-name"></span></p>
-                  <p class="mt-1"><span>Creator Name: </span><span id="creator-name"></span></p>
+                  <!--p class="mt-1"><span>Creator Name: </span><span id="creator-name"></span></p-->
                   <p class="mt-1"><span>Account E-mail: </span><span id="account-email"></span></p>
                 </div>
                 <div class="px-4" id="right-container">
@@ -256,6 +299,7 @@
                   <p class="truncate mt-1"><span>Address: </span><span id="account-address"></span></p>
                   <p class="truncate mt-1"><span>Redeem script: </span><span id="account-redeem-script"></span></p>
                   <p class="mt-1"><span>Currency: </span><span id="account-currency"></span></p>
+                  <p class="mt-1"><span>No. of Signatures needed: </span><span id="account-signatures"></span></p>
                 </div>
               </div>
               <table class="relative w-full border-collapse left-1 border border-slate-400 text-center text-base font-light text-black bg-white mt-4">
@@ -265,11 +309,12 @@
                     <th scope="col" class="px-6 py-2 mt-2">Name</th>
                     <th scope="col" class="px-6 py-2 mt-2">E-mail</th>
                     <th scope="col" class="px-6 py-2 mt-2">Public key</th>
-                    <th scope="col" class="px-6 py-2 mt-2">Signature</th>
+                    <!--th scope="col" class="px-6 py-2 mt-2">Signature</th-->
                   </tr>
                 </thead>
                 <tbody id="account-bankers-list">
                 </tbody>
+
               </table>
               <div  class="absolute h-96 mt-5 pl-56 right-6" id="account-buttons">
                 <!--Button are generated in renderer javascript-->
@@ -277,19 +322,27 @@
             </div>
             <div id="account-actions" class="hidden">
               <h1>Account actions</h1>
-              <table class="min-w-full text-left text-sm font-light text-white">
-                <thead class="border-b font-medium dark:border-neutral-500">
-                  <tr>
-                    <th scope="col" class="px-6 py-4">Date</th>
-                    <th scope="col" class="px-6 py-4">Type</th>
-                    <th scope="col" class="px-6 py-4">Note</th>
-                    <th scope="col" class="px-6 py-4">Status</th>
-                  </tr>
-                </thead>
-                <tbody id="actions-list-body">
-                </tbody>
-              </table>
-
+              <div class=" max-h-[420px] overflow-y-auto">
+                <table class="min-w-full text-left text-sm font-light text-white">
+                  <thead class="border-b font-medium dark:border-neutral-500">
+                    <tr>
+                      <th scope="col" class="px-6 py-4">ID</th>
+                      <th scope="col" class="px-6 py-4">Date</th>
+                      <th scope="col" class="px-6 py-4">Banker</th>
+                      <th scope="col" class="px-6 py-4">Action</th>
+                      <th scope="col" class="px-6 py-4">TxID</th>
+                      <th scope="col" class="px-6 py-4">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="actions-list-body">
+                  </tbody>
+                </table>
+              </div>
+              <button
+                id="account-actions-back-btn"
+                class="inline-flex items-center px-10 py-2.5 text-base font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">
+                Back
+              </button>
             </div>
             <div id="account-withdrawal" class="hidden text-white mt-4 text-xl">
               Withdrawal
@@ -307,7 +360,7 @@
                  </div>
                </div>
                <!--Body of list unspent-->
-               <div class="grid mb-4 mt-4 font-normal text-xl" id="list-unspent"></div>
+               <div class="grid mb-4 mt-4 font-normal text-xl gap-2" id="list-unspent"></div>
                <form id="withdraw-submit" class="mt-28">
                   <div id="address-amount">
                      <div class="flex justify-end">
@@ -319,9 +372,21 @@
                      </div>
                      <div class="pl-2 grid grid-cols-4 gap-2 -mx-2 space-y-4 md:space-y-0 top-10 text-sm" id="address-keys">
 
-                       <input type="text" placeholder="Enter Address" id="withdraw-address" class="relative grid col-span-2 h-10 w-full text-base text-black font-normal placeholder-gray-600 border focus:shadow-outline">
+                       <input
+                        type="text"
+                        required
+                        placeholder="Enter Address"
+                        id="withdraw-address"
+                        class="relative grid col-span-2 h-10 w-full text-base text-black font-normal placeholder-gray-600 border focus:shadow-outline">
 
-                       <input type="text" placeholder="Enter Amount" id="withdraw-amount" class="relative grid col-span-1 h-10 w-full text-base font-normal text-black placeholder-gray-600 border focus:shadow-outline user-input-amount">
+                       <input
+                        type="number"
+                        required
+                        step=0.000001
+                        min=0
+                        placeholder="Enter Amount"
+                        id="withdraw-amount"
+                        class="relative grid col-span-1 h-10 w-full text-base font-normal text-black placeholder-gray-600 border focus:shadow-outline user-input-amount">
 
                        <img src="./assets/imgs/plus.svg" id="withdrawal-plus-icon" class="pubkeyAdd green cursor-pointer h-11" width="50" height="50" />
                      </div>
@@ -330,7 +395,14 @@
                   <div class="mt-8">
                     <label for="withdraw-fee" class="text-sm mt-2">Transaction Fee</label>
                     <div class="mt-2">
-                     <input type="text" placeholder="0.001" id="withdraw-fee" class="text-black font-normal h-10 w-64">
+                     <input
+                      type="number"
+                      step=0.00000001
+                      min=0
+                      placeholder="0.001"
+                      id="withdraw-fee"
+                      class="text-black font-normal h-10 w-64">
+
                     </div>
                   </div>
                   <button
@@ -372,16 +444,33 @@
               </div>
               <button
                 id="generate-request-signature-message"
-                class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">
+                class="inline-flex items-center px-5 py-2.5 text-base font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">
                 Generate
               </button>
             </div>
+            <div id="request-sig-banker-select" class="hidden">
+              <p class="text-xl text-white font-bold">Select banker</p>
+              <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
+
+              <div class="col-span-12 mt-4 text-gray-500 text-xs font-semibold py-1 m-1 relative w-full" id="next-banker-to-sign">
+                <select
+                  class="text-black font-normal text-sm relative h-10 col-span-2 block w-full p-2 mt-1"
+                  name="bankers-to-sign"
+                  id="select-bankers-to-sign"
+                >
+                </select>
+              </div>
+              <button id="generate-sign-message" class="inline-flex items-center px-12 py-3 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Generate</button>
+            </div>
             <div id="send-signature" class="hidden">
               <h1 class="text-white">Transaction Signature</h1>
-              <hr>
-              <h2 class="font-bold">Requesting for banker signature</h2>
               <br>
-              <div id="request-sig-message"></div>
+              <div id="request-sig-message" class="bg-white text-gray-600 break-all p-8 text-base font-normal max-h-[420px] overflow-y-auto"></div>
+              <button
+                id="send-signature-close-btn"
+                class="inline-flex items-center px-5 py-2.5 text-base font-medium text-center absolute right-8 my-3 text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">
+                Close
+              </button>
             </div>
           </div>
           <div id="second" class="p-9 hidden text-white text-xl font-bold mt-1">
@@ -389,7 +478,11 @@
             <hr class="my-3 mt-4 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
             <form id="create-new-form">
               <div class="relative mb-4 flex flex-wrap items-stretch">
-                <select class="text-black font-normal text-sm relative h-8 col-span-2 block w-full p-2 mt-1" name="currency" id="coin-currency">
+                <select
+                  class="text-black font-normal text-sm relative h-10 col-span-2 block w-full p-2 mt-1"
+                  name="currency"
+                  id="account-coin-currency"
+                >
                   <option value="woodcoin" selected>woodcoin</option>
                   <option value="bitcoin">bitcoin</option>
                   <option value="litecoin">litecoin</option>
@@ -399,7 +492,7 @@
                 <input
                   type="text"
                   id="contract-name"
-                  class="col-span-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add font-normal -mt-1" placeholder="Name of Contract">
+                  class="col-span-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm font-bold focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add -mt-1" placeholder="Name of Contract">
 
               </div>
               <!-- <div class="relative mb-4 flex flex-wrap items-stretch">
@@ -418,21 +511,21 @@
                     <!-- <input type="text" id="bankers-name" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name" placeholder="Bankers Name">
 
                     <input type="text" id="bankers-email" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-email" placeholder="Bankers Email"> -->
-                    <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
-                <div class="grid grid-cols-2 mt-10 multikeysInner">
-                    
-                    <div class="col-span-1 mt-8 text-gray-500 text-xs font-semibold py-1 m-1 relative w-full" id="banker-select">
-                    <!-- <select data-placeholder="Choose Bankers" multiple>
-                      <option value="" disabled selected hidden>Choose Bankers</option>
-                    </select> -->
+                  <div class="flex justify-between align-top cols-2 mt-10 multikeysInner">
+                     <!-- <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/> -->
+                    <div class="col-span-1 text-white text-base font-bold py-2 mt-5">
+                      <label class="w-full pr-4 right-1 left-96 -top-44" for="#releaseCoins">Select banker</label>
+                      <div class="col-span-12 mt-4 text-gray-500 text-xs font-semibold py-1 m-1 relative w-full" id="banker-select">
+                      <!-- <select data-placeholder="Choose Bankers" multiple>
+                        <option value="" disabled selected hidden>Choose Bankers</option>
+                      </select> -->
+                      </div>
                     </div>
-
-
-                    <!-- <a class="pubkeyAdd"><object width="50" height="50" class="green" id="img-anchor"></object></a> -->
-                    <div class="col-span-1 p-9 text-white text-xs font-bold py-2 mt-5">
-                      <label class="inline-flex relative w-full pr-4" for="#releaseCoins">Enter the amount of signatures required to release the coins</label>
-                      <div class="inline-flex relative pr-4 col-span-3 py-2 text-black font-lg">
-                        <select id="releaseCoins" class="px-40 py-2 border border-gray-400">
+                    <a class="pubkeyAdd"><object width="50" height="50" class="green" id="img-anchor"></object></a>
+                    <div class="col-span-1 text-white text-base font-bold py-2 mt-5">
+                      <label class="w-full pr-4 right-1 left-96 -top-44" for="#releaseCoins">Amount of signatures required to release the coins</label>
+                      <div class="pr-4 left-96 col-span-3 py-2 text-black font-lg">
+                        <select id="releaseCoins" class="w-96 right-2 mt-4 -top-36 py-3 px-44 border-gray-400">
                           <option>1</option>
                           <option selected>2</option>
                           <option>3</option>
@@ -449,96 +542,114 @@
                           <option>14</option>
                           <option>15</option>
                         </select>
-                        <button type="submit" class="inline-flex items-center px-10 py-2.5 text-sm font-medium text-center absolute w-32 right-10 mt-28 text-white bg-orange-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500 rounded-full">Submit</button>
                       </div>
-                      
+
+                    </div>
+                    <button type="submit" class="inline-flex items-center px-10 py-2.5 text-base font-medium text-center absolute w-32 right-10 mt-52 text-white bg-orange-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500 rounded-full">Submit</button>
                   </div>
-                </div>
               </div>
+
             </form>
           </div>
           <div id="addbanker" class="p-9 hidden text-xl text-white font-bold">
             Add Banker
             <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
             <form class="mt-2" id="add-banker-form">
-              <select class="text-black font-normal text-sm relative h-8 col-span-2 block w-full p-2 mt-4" name="currency" id="coin-currency">
-                <option value="woodcoin" selected>woodcoin</option>
+              <select class="text-black font-normal text-sm relative h-10 col-span-2 block w-full p-2 mt-4" name="currency" id="banker-coin-currency">
+                <option value="woodcoin">woodcoin</option>
                 <option value="bitcoin">bitcoin</option>
                 <option value="litecoin">litecoin</option>
               </select>
               <input type="text" id="banker-name-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-2" placeholder="Bankers Name">
               <input type="email" id="banker-email-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-email-add absoulte mt-2" placeholder="Bankers Email">
-              <button type="submit" id="banker-submit-button" class="inline-flex items-center px-10 py-3 text-sm font-medium text-center text-white bg-orange-500 focus:ring-4 focus:ring-orange-500 dark:focus:bg-orange-500 hover:bg-orange absolute mt-5 right-10 rounded-full">Submit</button>
+              <button type="submit" class="inline-flex items-center px-10 py-3 text-base font-medium text-center text-white bg-orange-500 focus:ring-4 focus:ring-orange-500 dark:focus:bg-orange-500 hover:bg-orange absolute mt-5 right-10 rounded-full">Submit</button>
             </form>
 
-            <div class="mx-auto hidden" id="banker-message-container">
+            <div class="mx-auto hidden font-normal text-base" id="banker-message-container">
               <!--div id="add-banker-message"></div-->
               <div id="banker-message-close-button"></div>
             </div>
 
-
-            <table id="bankers-list" class="relative w-full pl-96 flex-col border-collapse border border-slate-400 text-center text-sm font-light text-black bg-white mt-4">
-              <thead class="border-b font-medium dark:border-neutral-950">
-                <div before="List of Bankers" of Bankers class="before:content-[attr(before)] mt-20"></div><tr>
-                  <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-100"/>
-                  <th scope="col" class="px-6 py-2">Name</th>
-                  <th scope="col" class="px-6 py-2">Email</th>
-                  <th scope="col" class="px-6 py-2">Public Key</th>
-                  <th scope="col" class="px-6 py-2">Currency</th>
-                </tr>
-              </thead>
-              <tbody class="text-black bg-white" id="bankers-list-body">
-              </tbody>
-            </table>
+            <div id="bankers-list-container">
+              <div class="mt-20">
+                <p>List of Bankers</p>
+              </div>
+              <table id="bankers-list" class="relative w-full pl-96 flex-col border-collapse border border-slate-400 text-center text-sm font-light text-black bg-white mt-4">
+                <thead class="border-b font-medium dark:border-neutral-950">
+                  <tr>
+                    <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-100"/>
+                    <th scope="col" class="px-6 py-2">Name</th>
+                    <th scope="col" class="px-6 py-2">Email</th>
+                    <th scope="col" class="px-6 py-2">Public Key</th>
+                    <th scope="col" class="px-6 py-2">Currency</th>
+                  </tr>
+                </thead>
+                <tbody class="text-black bg-white" id="bankers-list-body">
+                </tbody>
+              </table>
+            </div>
 
 
           </div>
           <div id="third" class="p-9 hidden text-white text-xl font-bold">
             Instructions
             <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
-            <div class="h-96 bg-white">
+            <div class="h-96 bg-white font-normal text-base">
              <p class="text-black py-2 px-5 font-bold">Requesting for Bankers Public key:</p>
              <p class="text-black px-5 absolute mt-5 font-normal text-base">Please copy the line below and send it to robert@email.com</p>
              <p class="text-black px-5 absolute mt-14 font-normal text-base">Jon Jon is requesting for you to become a banker at this Stargazer</p>
              <p class="text-black px-5 absolute mt-24 font-normal text-base">Please copy the message inside and import in FSCB</p>
             </div>
           </div>
-          <div id="fourth" class="hidden p-4 text-white text-xl font-bold">
+          <div id="fourth" class="hidden p-9 text-white text-xl font-bold">
             About FSCB
             <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
+            <div class="h-auto font-bold text-xl mt-5 bg-white">
+              <p class=" text-black px-5 py-3">PLEASE READ ALL AND UNDERSTAND BEFORE USE</p>
+              <p class="text-black px-5 mt-2 text-base font-normal text-left">The Free State Central Bank (FSCB) is open source software and comes with no warranty or guarantee of any kind.</p>
+              <p class="text-black px-5 mt-2 text-base font-normal text-left">The purpose of FSCB is to help organize cryptocurrency trusts, which store funds using multisignatures enabling a higher security envronment for long term wealth management.  FSCB was created by a team of software consutants working with the Vermont Secure Computing Consultancy.</p>
+              <p class="text-black px-5 mt-2 text-base font-normal text-left">In a normal banking model, an account holder entrusts bank employees with custody of their funds. In the FSCB model, the account holder entrusts "bankers" from his own social networks to take partial custody, to hold the private keys that control the funds in the account.</p>
+              <p class="text-black px-5 mt-2 text-base font-normal text-left">The account holder can also choose the redundancy level of the trust, via how many keys will be necessary to save and move the funds. Because of this redundancy, if one or more keys are lost, the funds will not necessarily be lost.</p>
+              <p class="text-black px-5 mt-2 text-base font-normal text-left">There is no futher counterparty risk associated with such an account, no company or individual other than those selected by the account holder has any control of the keys.</p>
+              <p class="text-black px-5 mt-2 text-base font-normal text-left">FSCB software will never store any private keys, remember to back up all keys and information associated with your funds!  Any methods can be used by selected bankers to store private keys.</p>
+              <p class="text-black px-5 mt-2 text-base font-normal text-left">FSCB software creators have no control of your funds nor responsibility of any funds.</p>
+              <p class="text-black px-5 mt-2 text-base font-normal text-left">FSCB is serverless, there are no centralized records of any kind maintained regarding the use of this software.</p>
+              <p class="text-black px-5 mt-1 text-lg font-bold text-left">Use at your own risk!</p>
+
+            </div>
             <table id="data-container"></table>
           </div>
-          <div id="fifth" class="hidden p-4 text-white text-xl font-bold">
+          <!-- <div id="fifth" class="hidden p-4 text-white text-xl font-bold">
             How it works
             <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
-          </div>
+          </div> -->
           <div id="sixth" class="hidden p-4 text-white text-xl font-bold">
             Backup
             <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
-            <div>
-              <!--p>Save the backup file to this directory: </p>
-              <input id="export-browse-btn" type="button" value="Browse..." />
-              <input type="file" id="select-dir" hidden webkitdirectory="" directory="" mozdirectory=""-->
 
+            <div id="backup-btn-container">
               <button id="export-btn" class="inline-flex items-center px-12 py-3 text-sm font-medium text-center absolute right-5 mt-5 text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Export Data</button>
             </div>
-          </div>
-          <div id="seventh" class="hidden p-4 text-white text-xl font-bold">
-            Restore
-            <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
+            <div id="backup-message-container" class="hidden">
+              <p class="mt-8 text-base text-normal">This is your FSCB backup. Please copy the line below and save it.</p>
+              <div class="mt-2 bg-white font-normal text-base p-8 max-h-[420px] overflow-y-auto" id="backup-message">
+              </div>
+
+              <button id="close-backup-btn" class="inline-flex items-center px-12 py-3 text-sm font-medium text-center absolute right-5 mt-5 text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Close</button>
+            </div>
           </div>
         </div>
       </div>
       <div id="user-profile" class="hidden h-screen bg-[#1a1a1a]">
         <form id="user-profile-form" class="relative text-white left-44 p-1 pl-48">
           <div class="mt-16 pl-7">
-            <img src="./assets/imgs/FSP LOGO 7 2.png" alt="fscb">
+            <img src="./assets/imgs/fscb_logo_round.png" alt="fscb">
           </div>
            <div class="font-semibold mt-8">
-            <span>Please do fill up the form</span>
+            <!--span>Please do fill up the form</span-->
            </div>
           <input input type="text" id="user-name" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block relative w-96 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-2" placeholder="Username">
-          <input input type="text" id="user-email" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block relative w-96 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-2" placeholder="Users E-mail">
+          <input input type="email" id="user-email" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block relative w-96 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-2" placeholder="Users E-mail">
           <button type="submit" class="items-center relative px-40 py-3 text-md font-medium text-center text-white bg-orange-500 focus:ring-4 focus:ring-orange-500 dark:focus:bg-orange-500 hover:bg-orange mt-5 ml-2 rounded-full">Submit</button>
         </form>
       </div>
