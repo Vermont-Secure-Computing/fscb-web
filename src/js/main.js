@@ -1,10 +1,13 @@
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import axios from 'axios';
-import Toastify from 'toastify-js'
+import Toastify from 'toastify-js';
+
 
 
 const importText =   document.getElementById('import-text');
 // const bankersClick = document.getElementsByClassName('pubkeyAdd')[0];
+
+
 
 const formCreateAccount =   document.getElementById('create-new-form');
 const importTextButton = document.getElementById('import-text-button')
@@ -54,6 +57,7 @@ let tabTogglers = tabsContainer.querySelectorAll("#tabs a");
 **/
 let withdrawalFee = document.getElementById("withdraw-fee")
 let donateBtn = document.getElementById("donate-button")
+let sendSignatureCloseBtn = document.getElementById("send-signature-close-btn")
 
 /**
   Export screen
@@ -197,50 +201,130 @@ async function balanceApi() {
           });
       const allaccount = accounts.data
       for(let i in allaccount) {
+        if (allaccount[i].currency === 'woodcoin') {
+          try {
+              const response = await axios(`https://twigchain.com/ext/getAddress/${allaccount[i].address}`, {
+                  method: 'get',
+                  headers: {
+                      'Accept': 'application/json'
+                  }
+                  });
+              
+              const body = response.data;
+              console.log("data responce", body)
+              if (body.address) {
+                  if (allaccount[i].address === body.address) {
+      
+                      allaccount[i].balance = body.balance
+                      
+                      const accounts = await Filesystem.readFile({
+                          path: 'data/data.json',
+                          directory: Directory.Documents,
+                          encoding: Encoding.UTF8,
+                        });
+                      if (accounts.data) {
+                          const jdata = accounts.data
+                          jdata[i] = allaccount[i]
+                          const writeAccount = await Filesystem.writeFile({
+                              path: 'data/data.json',
+                              data: jdata,
+                              directory: Directory.Documents,
+                              encoding: Encoding.UTF8,
+                          });
+                          if (writeAccount.uri) {
+                              const readmore = await Filesystem.readFile({
+                                  path: 'data/data.json',
+                                  directory: Directory.Documents,
+                                  encoding: Encoding.UTF8,
+                                });
+                              listfile(readmore)
+                          }
+                      }
+                  }
+              }
 
-        try {
-            const response = await axios(`https://twigchain.com/ext/getAddress/${allaccount[i].address}`, {
-                method: 'get',
+          } catch (e) {
+              console.log(e)
+          }
+        } else if (allaccount[i].currency === 'bitcoin') {
+          try {
+            const response = await axios(`https://chain.so/api/v3/balance/BTC/${allaccount[i].address}`, {
+                method: 'GET',
                 headers: {
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'API-KEY': import.meta.env.VITE_API_KEY
                 }
+            });
+            if (response.data) {
+              allaccount[i].balance = body.data.confirmed
+              const accounts = await Filesystem.readFile({
+                path: 'data/data.json',
+                directory: Directory.Documents,
+                encoding: Encoding.UTF8,
+              });
+              if (accounts.data) {
+                const jdata = accounts.data
+                jdata[i] = allaccount[i]
+                const writeAccount = await Filesystem.writeFile({
+                    path: 'data/data.json',
+                    data: jdata,
+                    directory: Directory.Documents,
+                    encoding: Encoding.UTF8,
                 });
-
-            const body = response.data;
-            console.log("data responce", body)
-            if (body.address) {
-                if (allaccount[i].address === body.address) {
-
-                    allaccount[i].balance = body.balance
-
-                    const accounts = await Filesystem.readFile({
+                if (writeAccount.uri) {
+                    const readmore = await Filesystem.readFile({
                         path: 'data/data.json',
                         directory: Directory.Documents,
                         encoding: Encoding.UTF8,
                       });
-                    if (accounts.data) {
-                        const jdata = accounts.data
-                        jdata[i] = allaccount[i]
-                        const writeAccount = await Filesystem.writeFile({
-                            path: 'data/data.json',
-                            data: jdata,
-                            directory: Directory.Documents,
-                            encoding: Encoding.UTF8,
-                        });
-                        if (writeAccount.uri) {
-                            const readmore = await Filesystem.readFile({
-                                path: 'data/data.json',
-                                directory: Directory.Documents,
-                                encoding: Encoding.UTF8,
-                              });
-                            listfile(readmore)
-                        }
-                    }
+                    listfile(readmore)
                 }
+              }
             }
-
-        } catch (e) {
+          } catch (e) {
             console.log(e)
+          }
+        } else if (allaccount[i].currency === 'litecoin') {
+          try {
+            const response = await axios(`https://chain.so/api/v3/balance/LTC/${allaccount[i].address}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'API-KEY': import.meta.env.VITE_API_KEY
+                }
+            });
+            if (response.data) {
+              allaccount[i].balance = body.data.confirmed
+              const accounts = await Filesystem.readFile({
+                path: 'data/data.json',
+                directory: Directory.Documents,
+                encoding: Encoding.UTF8,
+              });
+              if (accounts.data) {
+                const jdata = accounts.data
+                jdata[i] = allaccount[i]
+                const writeAccount = await Filesystem.writeFile({
+                    path: 'data/data.json',
+                    data: jdata,
+                    directory: Directory.Documents,
+                    encoding: Encoding.UTF8,
+                });
+                if (writeAccount.uri) {
+                    const readmore = await Filesystem.readFile({
+                        path: 'data/data.json',
+                        directory: Directory.Documents,
+                        encoding: Encoding.UTF8,
+                      });
+                    listfile(readmore)
+                }
+              }
+            }
+          } catch (e) {
+            console.log(e)
+          }
+        } else {
+          console.log("Chain not found")
+          return
         }
     }
   }
@@ -325,7 +409,7 @@ function getAccountDetails(account){
 
       //accountDetails.innerHTML = ""
       let accountName = document.getElementById('account-name')
-      let creatorName = document.getElementById('creator-name')
+      // let creatorName = document.getElementById('creator-name')
       let accountEmail = document.getElementById('account-email')
       let accountBalance = document.getElementById('account-balance')
       let accountAddress = document.getElementById('account-address')
@@ -333,7 +417,7 @@ function getAccountDetails(account){
       let accountCurrency = document.getElementById('account-currency')
 
       accountName.innerHTML = account.contract_name
-      creatorName.innerHTML = account.creator_name
+      // creatorName.innerHTML = account.creator_name
       accountEmail.innerHTML = account.creator_email
       accountBalance.innerHTML = account.balance
       accountAddress.innerHTML = account.address
@@ -1970,6 +2054,19 @@ async function contractnew (options) {
     // win.webContents.send('account:filterSig', JSON.stringify(accountFilter))
   };
 
+function closeSendSignatureScreen() {
+  let sendSignature = document.getElementById('send-signature')
+  let signatureMessage = document.getElementById('request-sig-message')
+  let accountListScreen = document.getElementById('accounts-list')
+
+  accountListScreen.classList.remove('hidden')
+  sendSignature.classList.add('hidden')
+  signatureMessage.innerHTML = ""
+
+  showImportListScreen()
+}
+
+
   function requestSignatureWindow(tx, account) {
     let accountDetails = document.getElementById('account-details')
     let accountWithdrawal = document.getElementById('account-withdrawal')
@@ -2078,3 +2175,7 @@ importTextButton.addEventListener('click', openImportTextTab)
 formWithdraw.addEventListener('submit', checkTxFee);
 donateBtn.addEventListener('click', addDonationAddress);
 // exportBtn.addEventListener('click', exportJsonData);
+<<<<<<< HEAD
+=======
+sendSignatureCloseBtn.addEventListener('click', closeSendSignatureScreen)
+>>>>>>> 6f1ef70 (add balance api)
