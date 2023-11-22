@@ -31,8 +31,12 @@
 		<script type="text/javascript" src="./js/utils/qcode-decoder.min.js"></script>
 		<script type="text/javascript" src="./js/utils/jsbn.js"></script>
 		<script type="text/javascript" src="./js/utils/ellipticcurve.js"></script>
+    <script type="text/javascript" src="./js/utils/bitellipticcurve.js"></script>
+    <script type="text/javascript" src="./js/utils/litellipticcurve.js"></script>
 
 		<script type="text/javascript" src="./js/utils/coin.js"></script>
+    <script type="text/javascript" src="./js/utils/bitcoin.js"></script>
+		<script type="text/javascript" src="./js/utils/litecoin.js"></script>
 
     <link rel="icon" type="image/x-icon" href="./assets/icon/favicon.ico" />
     <link rel="manifest" href="./manifest.json" />
@@ -315,7 +319,7 @@
                 </tbody>
 
               </table>
-              <div  class="absolute h-96 mt-5 pl-56 right-6" id="account-buttons">
+              <div  class="flex justify-end mt-5" id="account-buttons">
                 <!--Button are generated in renderer javascript-->
               </div>
             </div>
@@ -544,7 +548,9 @@
                       </div>
 
                     </div>
-                    <button type="submit" class="inline-flex items-center px-10 py-2.5 text-base font-medium text-center absolute w-32 right-10 mt-52 text-white bg-orange-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500 rounded-full">Submit</button>
+                  </div>
+                  <div class="flex justify-end">
+                    <button type="submit" class="items-center px-10 py-2.5 text-base font-medium text-center w-32 mt-52 text-white bg-orange-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500 rounded-full">Submit</button>
                   </div>
               </div>
 
@@ -561,12 +567,15 @@
               </select>
               <input type="text" id="banker-name-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-2" placeholder="Bankers Name">
               <input type="email" id="banker-email-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-email-add absoulte mt-2" placeholder="Bankers Email">
-              <button type="submit" id="banker-submit-button" class="inline-flex items-center px-10 py-3 text-base font-medium text-center text-white bg-orange-500 focus:ring-4 focus:ring-orange-500 dark:focus:bg-orange-500 hover:bg-orange absolute mt-5 right-10 rounded-full">Submit</button>
+
+              <div class="flex justify-end">
+                <button type="submit" id="banker-submit-button" class="items-center px-10 py-3 text-base font-medium text-center text-white bg-orange-500 focus:ring-4 focus:ring-orange-500 dark:focus:bg-orange-500 hover:bg-orange mt-5 rounded-full">Submit</button>
+              </div>
             </form>
 
             <div class="mx-auto hidden font-normal text-base" id="banker-message-container">
               <!--div id="add-banker-message"></div-->
-              <div id="banker-message-close-button"></div>
+              <div id="banker-message-close-button" class="flex justify-end"></div>
             </div>
 
             <div id="bankers-list-container">

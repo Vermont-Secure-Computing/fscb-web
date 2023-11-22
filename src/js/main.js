@@ -71,7 +71,7 @@ let inputFileBrowser = document.getElementById("select-dir")
 // const accountList = document.getElementById('accounts-list');
 
 const sigNumber = document.getElementById('releaseCoins');
-const currency = document.getElementById('coin-currency')
+const currency = document.getElementById('account-coin-currency')
 let bankersArray
 let selectedAccountDetails = {}
 let USER = {}
@@ -173,12 +173,13 @@ tabTogglers.forEach(function(toggler) {
         let tabContents = document.querySelector("#tab-contents");
 
         for (let i = 0; i < tabContents.children.length-1; i++) {
+          let tab = i + 1
           tabTogglers[i].parentElement.classList.remove("bg-gradient-to-l", "from-gray-500");
-          tabContents.children[i].classList.remove("hidden");
-          if ("#" + tabContents.children[i].id === tabName) {
+          tabContents.children[tab].classList.remove("hidden");
+          if ("#" + tabContents.children[tab].id === tabName) {
               continue;
           }
-          tabContents.children[i].classList.add("hidden");
+          tabContents.children[tab].classList.add("hidden");
 
         }
         e.target.parentElement.classList.add("bg-gradient-to-l", "from-gray-500");
@@ -209,14 +210,14 @@ async function balanceApi() {
                       'Accept': 'application/json'
                   }
                   });
-              
+
               const body = response.data;
               console.log("data responce", body)
               if (body.address) {
                   if (allaccount[i].address === body.address) {
-      
+
                       allaccount[i].balance = body.balance
-                      
+
                       const accounts = await Filesystem.readFile({
                           path: 'data/data.json',
                           directory: Directory.Documents,
@@ -415,6 +416,7 @@ function getAccountDetails(account){
       let accountAddress = document.getElementById('account-address')
       let accountRedeemScript = document.getElementById('account-redeem-script')
       let accountCurrency = document.getElementById('account-currency')
+      let accountSignatures = document.getElementById('account-signatures')
 
       accountName.innerHTML = account.contract_name
       // creatorName.innerHTML = account.creator_name
@@ -423,7 +425,7 @@ function getAccountDetails(account){
       accountAddress.innerHTML = account.address
       accountRedeemScript.innerHTML = account.redeem_script
       accountCurrency.innerHTML = account.currency
-
+      accountSignatures.innerHTML = account.signature_nedded
 
       let tableBody = document.getElementById('account-bankers-list')
       tableBody.innerHTML = ''
@@ -438,8 +440,8 @@ function getAccountDetails(account){
           email.innerHTML = bankers[x].banker_email
           let publicKey = row.insertCell(2);
           publicKey.innerHTML = pubkey
-          let signature = row.insertCell(3);
-          signature.innerHTML = bankers[x].signature ? bankers[x].signature : 'no signature yet'
+          // let signature = row.insertCell(3);
+          // signature.innerHTML = bankers[x].signature ? bankers[x].signature : 'no signature yet'
         }
       }
 
@@ -448,13 +450,13 @@ function getAccountDetails(account){
       buttonContainer.innerHTML = ''
 
       let viewActionsButton = document.createElement('button')
-      viewActionsButton.classList.add("inline-flex", "items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-full", "focus:ring-4", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
+      viewActionsButton.classList.add("items-center", "m-2", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-full", "focus:ring-4", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
       viewActionsButton.innerHTML = "Actions"
       let actions = account.signatures
       viewActionsButton.addEventListener("click", function() {listAccountActions(actions);}, false);
 
       let withdrawalButton = document.createElement('button')
-      withdrawalButton.classList.add("inline-flex", "items-center", "m-2", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-full", "focus:ring-4", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
+      withdrawalButton.classList.add("items-center", "m-2", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-full", "focus:ring-4", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
       withdrawalButton.innerHTML = "Withdrawal"
       let address = {
           "address": account.address,
@@ -844,15 +846,18 @@ function showBankerRequestSend(data) {
     p5.innerHTML = "-----End fscb message-----";
 
     const copyToClipboardText = p1.innerHTML + '\n' + p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML
+    let copyButtonContainer = document.createElement('div')
+    copyButtonContainer.setAttribute('class', 'flex justify-end')
     let copyButton = document.createElement('img')
     copyButton.setAttribute('src', './assets/imgs/copy_button.png')
-    copyButton.setAttribute('class', 'inline-flex absolute right-10 px-2 cursor-pointer hover:scale-125 transition duration-500')
+    copyButton.setAttribute('class', 'px-2 cursor-pointer hover:scale-125 transition duration-500')
     copyButton.addEventListener("click", function() {
       navigator.clipboard.writeText(copyToClipboardText)
       alertSuccess("Message successfully copied in clipboard.")
     }, false);
 
-    div.appendChild(copyButton)
+    copyButtonContainer.appendChild(copyButton)
+    div.appendChild(copyButtonContainer)
     div.appendChild(p)
     div.appendChild(br)
     div.appendChild(p1)
@@ -865,7 +870,7 @@ function showBankerRequestSend(data) {
 
 
     let closeButton = document.createElement('button')
-    closeButton.classList.add("inline-flex", "items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "absolute", "right-5", "mt-5", "text-white", "bg-orange-500", "rounded-lg", "focus:ring-4", "focus:ring-blue-200", "dark:focus:ring-orange-500", "hover:bg-orange-500")
+    closeButton.classList.add("items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "mt-5", "text-white", "bg-orange-500", "rounded-lg", "focus:ring-4", "focus:ring-blue-200", "dark:focus:ring-orange-500", "hover:bg-orange-500")
     closeButton.innerHTML = "Close"
     closeButton.addEventListener("click", function() {
 
@@ -1038,7 +1043,9 @@ async function accountBankerData() {
         let li = e.target.closest('li');
         if(!li){return;}
         let select = li.closest('.selectMultiple');
-        if(!select.classList.contains('clicked')){
+        // add a checker, banker selected should not exceed to 14 bankers
+        let selectedB = document.querySelectorAll('.activeClass a')
+        if(!select.classList.contains('clicked') && selectedB.length < 14){
             select.classList.add('clicked');
             if(li.previousElementSibling){
                 li.previousElementSibling.classList.add('beforeRemove');
@@ -1103,6 +1110,8 @@ async function accountBankerData() {
     //             }, 200);
             }, 300); //600
                 //2nd
+        } else {
+          alertError("Maximum number of bankers in an account is 14.")
         }
     });
     //2
@@ -1356,7 +1365,16 @@ function addOrSign(options) {
 async function bankerPukey(message) {
     importArea.classList.add('hidden')
     bankerGeneratePrivkey.classList.remove('hidden')
-
+    let coin_js
+    if (message.currency === "woodcoin") {
+      coin_js = coinjs
+    } else if (message.currency === "bitcoin") {
+      coin_js = bitcoinjs
+    } else if (message.currency === "litecoin") {
+      coin_js = litecoinjs
+    } else {
+      return
+    }
     coinjs.compressed = true
     const userAddress = await coinjs.newKeys()
     console.log(userAddress)
@@ -1545,24 +1563,25 @@ async function saveAndCreateText(e) {
         bankersMerge.push(innerMultiKey[i].dataset.value)
     }
     console.log("banker merge ", bankersMerge)
+
+    let coin_js
+
+    if (coinCurrencySend === "woodcoin") {
+      coin_js = coinjs
+    } else if (coinCurrencySend === "bitcoin") {
+      coin_js = bitcoinjs
+    } else if (coinCurrencySend === "litecoin") {
+      coin_js = litecoinjs
+    } else {
+      console.log("invalid currency")
+    }
+
     const keys = bankersMerge;
     const multisig =  coinjs.pubkeys2MultisigAddress(keys, sigSendNumber);
     console.log("multisig ", multisig)
     const pubkeySend = multisig.address;
     const redeemScriptSend = multisig.redeemScript;
 
-
-    // ipcRenderer.send("message:contractnew", {
-    //     contractSendName,
-    //     creatorSendName,
-    //     creatorSendEmail,
-    //     bankersMerge,
-    //     sigSendNumber,
-    //     coinCurrencySend,
-    //     creatorAddressDetail,
-    //     pubkeySend,
-    //     redeemScriptSend
-    // });
     let data = {
         contractSendName,
         creatorSendName,
@@ -1634,6 +1653,7 @@ async function contractnew (options) {
                 encoding: Encoding.UTF8,
             });
             alertSuccess("Account successfully created.")
+            updateAccountListScreen(contentnew)
             showImportListScreen()
         } else {
             console.log("add contract else has been called")
@@ -1647,6 +1667,7 @@ async function contractnew (options) {
                 encoding: Encoding.UTF8,
             });
             alertSuccess("Account successfully created.")
+            updateAccountListScreen(addContract)
             showImportListScreen()
         }
     } catch (e) {
@@ -1669,6 +1690,44 @@ async function contractnew (options) {
     }
     let accountListTab = document.getElementById('account-list-tab')
     accountListTab.classList.add("bg-gradient-to-l", "from-gray-500");
+  }
+
+  function updateAccountListScreen(accounts) {
+    const accountBody = document.getElementById('accounts-list-body')
+    let coinInitial;
+
+    accountBody.innerHTML = ""
+    for(let x in accounts) {
+        if(accounts.hasOwnProperty(x)){
+            if (accounts[x].currency === 'woodcoin') {
+              coinInitial = 'LOG'
+            } else if (accounts[x].currency === 'bitcoin') {
+              coinInitial = 'BTC'
+            } else {
+              coinInitial = 'LTC'
+            }
+            let row = accountBody.insertRow();
+            let name = row.insertCell(0);
+            name.setAttribute('class', 'pl-6')
+            name.innerHTML = accounts[x].contract_name
+            let address = row.insertCell(1);
+            address.innerHTML = coinInitial + ':' + accounts[x].address
+            let balance = row.insertCell(2);
+            balance.setAttribute('class', 'pl-4')
+            balance.innerHTML = accounts[x].balance
+            let veiwall = row.insertCell(3)
+            veiwall.setAttribute('class', 'text-center')
+            let viewAccountDetailsButton = document.createElement('button')
+            viewAccountDetailsButton.setAttribute('class', "px-5 py-0.5 font-small text-white bg-orange-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500 rounded-full")
+            viewAccountDetailsButton.innerHTML = "view"
+            veiwall.appendChild(viewAccountDetailsButton)
+
+            let details = accounts[x]
+            viewAccountDetailsButton.addEventListener("click", function() {getAccountDetails(details);}, false);
+
+        }
+    }
+
   }
 
   function addDonationAddress() {
@@ -2175,7 +2234,4 @@ importTextButton.addEventListener('click', openImportTextTab)
 formWithdraw.addEventListener('submit', checkTxFee);
 donateBtn.addEventListener('click', addDonationAddress);
 // exportBtn.addEventListener('click', exportJsonData);
-<<<<<<< HEAD
-=======
 sendSignatureCloseBtn.addEventListener('click', closeSendSignatureScreen)
->>>>>>> 6f1ef70 (add balance api)
