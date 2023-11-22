@@ -72,6 +72,8 @@ let inputFileBrowser = document.getElementById("select-dir")
 
 const sigNumber = document.getElementById('releaseCoins');
 const currency = document.getElementById('account-coin-currency')
+currency.addEventListener('change', setAccountCurrency)
+let ACCOUNT_CURRENCY = "woodcoin"
 let bankersArray
 let selectedAccountDetails = {}
 let USER = {}
@@ -85,6 +87,9 @@ let userInputAmountTotal = 0
 let TOTAL_AMOUNT_TO_WITHDRAW = 0
 let CHANGE_ADDRESS
 let CHANGE_AMOUNT
+let DONATION_LOG = 'WhAiyvrEhG6Ty9AkTb1hnUwbT3PubdWkAg'
+let DONATION_BTC = 'WhAiyvrEhG6Ty9AkTb1hnUwbT3PubdWkAg'
+let DONATION_LTC = 'WhAiyvrEhG6Ty9AkTb1hnUwbT3PubdWkAg'
 let DONATION_ADDRESS = 'WhAiyvrEhG6Ty9AkTb1hnUwbT3PubdWkAg'
 let WITHDRAWAL_FEE = 0.01
 
@@ -123,9 +128,9 @@ window.onload = async function() {
             directory: Directory.Documents,
             encoding: Encoding.UTF8,
           });
-        // console.log("accounts: ", accounts)
+        console.log("accounts: ", accounts)
         // win.webContents.send("list:file", accounts)
-        listfile(accounts.data)
+        listfile(accounts)
       }
 }
 
@@ -185,6 +190,49 @@ tabTogglers.forEach(function(toggler) {
         e.target.parentElement.classList.add("bg-gradient-to-l", "from-gray-500");
     });
 });
+
+/**
+  Refresh button in account list screen
+**/
+let refreshBtn = document.getElementById("refresh-account-list")
+refreshBtn.addEventListener("click", () => {
+  balanceApi()
+})
+/**
+  End of Refresh button in account list screen
+**/
+
+
+function setAccountCurrency() {
+  const coinCurrencySend = currency.options[currency.selectedIndex].text;
+  ACCOUNT_CURRENCY = coinCurrencySend
+  // ipcRenderer.send("newaccount:banker:filter", {});
+  readBankersFile()
+}
+
+async function readBankersFile() {
+  // const fileName = "banker.json"
+  // const path = "data"
+  // if (fs.existsSync(homedir + "/" + path +"/"+ fileName)) {
+  //   fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
+  //     console.log("jdata: ", jdata)
+  //     jdata = JSON.parse(jdata);
+  //     //Step 3: append contract variable to list
+  //     // console.log(jdata);
+  //     // const wData = JSON.stringify(jdata, null, 2)
+  //     // win.webContents.send('send:bankers', jdata)
+  //   })
+  // }
+  const bankerCheckResult = await readdir('bankers.json');
+  if (bankerCheckResult) {
+    const contents = await Filesystem.readFile({
+      path: 'data/bankers.json',
+      directory: Directory.Documents,
+      encoding: Encoding.UTF8,
+    });
+  }
+  return
+}
 
 /* get balance from api */
 async function balanceApi() {
@@ -331,6 +379,19 @@ async function balanceApi() {
   }
 }
 
+function setDonationAddress(currency) {
+  if (currency === "woodcoin") {
+    DONATION_ADDRESS = DONATION_LOG
+  } else if (currency === "bitcoin") {
+    DONATION_ADDRESS = DONATION_BTC
+  } else if (currency === "litecoin") {
+    DONATION_ADDRESS = DONATION_LTC
+  } else {
+    console.log("invalid currency")
+  }
+}
+
+
 /**
   Helper functions
 **/
@@ -344,36 +405,13 @@ function isEmailValid(email) {
 }
 
 async function listfile(evt) {
-    //console.log(e)
-    const convertToJson = evt
-    // console.log(convertToJson)
-    // let text = ""
-    // const container = document.getElementById('data-container')
-    // text+='<tr>'
-    // for(let x in convertToJson) {
-    //     if(convertToJson.hasOwnProperty(x)){
-    //         // console.log(convertToJson[x].email)
-    //         text+="<td>" + convertToJson[x].email + "</td>"
-    //     }
-    // }
-    // text+="</tr>"
-    // // console.log(text)
-    // // const stuff = convertToJson.map((item) => `<p>${item.firstname}<p>`)
-    // container.innerHTML = text
+    // console.log(evt)
+    const convertToJson = evt.data
     const accountBody = document.getElementById('accounts-list-body')
-    // let accountTr = document.createElement('tr')
-    // accountTr.setAttribute('class', 'border-b dark:border-neutral-500')
-    // let accountTd = document.createElement('td')
-    // accountTd.setAttribute('class', 'whitespace-nowrap px-6 py-4')
-    // let accountTd1 = document.createElement('td')
-    // accountTd1.setAttribute('class', 'whitespace-nowrap px-6 py-4')
-    // let accountTd2 = document.createElement('td')
-    // accountTd2.setAttribute('class', 'whitespace-nowrap px-6 py-4')
-    // let respub;
     accountBody.innerHTML = ""
     for(let x in convertToJson) {
         if(convertToJson.hasOwnProperty(x)){
-            // console.log("convert to json", convertToJson[x])
+            // console.log("convert to json", convertToJson[x].contract_name)
             // ipcRenderer.send("get:balance", {"pubkey": convertToJson[x].address})
             let row = accountBody.insertRow();
             let name = row.insertCell(0);
@@ -401,6 +439,7 @@ async function listfile(evt) {
 /* account detail view */
 function getAccountDetails(account){
     console.log("get account details: ", account)
+    ACCOUNT_CURRENCY = account.currency
     if (account.hasOwnProperty('id')) {
       let accountList = document.getElementById('accounts-list')
       let accountDetails = document.getElementById('account-details')
@@ -426,6 +465,7 @@ function getAccountDetails(account){
       accountRedeemScript.innerHTML = account.redeem_script
       accountCurrency.innerHTML = account.currency
       accountSignatures.innerHTML = account.signature_nedded
+
 
       let tableBody = document.getElementById('account-bankers-list')
       tableBody.innerHTML = ''
@@ -455,14 +495,27 @@ function getAccountDetails(account){
       let actions = account.signatures
       viewActionsButton.addEventListener("click", function() {listAccountActions(actions);}, false);
 
+      /**
+        Disable withdrawal button when account balance is zero(0)
+      **/
       let withdrawalButton = document.createElement('button')
-      withdrawalButton.classList.add("items-center", "m-2", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-full", "focus:ring-4", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
       withdrawalButton.innerHTML = "Withdrawal"
-      let address = {
-          "address": account.address,
-          "redeemscript": account.redeem_script
+      if (account.balance > 0) {
+        withdrawalButton.classList.add("inline-flex", "items-center", "m-2", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-full", "focus:ring-4", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
+        withdrawalButton.disabled = false;
+      } else {
+        withdrawalButton.classList.add("inline-flex", "items-center", "m-2", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-full", "cursor-not-allowed")
+        withdrawalButton.disabled = true;
       }
-      withdrawalButton.addEventListener("click", function() {accountWithdrawalFunc(address);}, false);
+      let address = {
+        "address": account.address,
+        "redeemscript": account.redeem_script,
+        "currency": account.currency
+    }
+      withdrawalButton.addEventListener("click", function() {
+        setDonationAddress(account.currency)
+        accountWithdrawalFunc(address);
+      }, false);
 
 
       buttonContainer.appendChild(viewActionsButton)
@@ -475,11 +528,22 @@ function getAccountDetails(account){
   Owner view - Account withdrawal
 **/
 async function accountWithdrawalFunc(address){
-    console.log("withdrawal: ", address.address)
+    console.log("withdrawal: ", address)
     CHANGE_ADDRESS = address.address
     // ipcRenderer.send("unspent:api", address.address)
-    const listP = await unspentApi(address.address)
-    const script = coinjs.script()
+    let coin_js
+    if (address.currency === "woodcoin") {
+      coin_js = coinjs
+    } else if (address.currency === "bitcoin") {
+      coin_js = bitcoinjs
+    } else if (address.currency === "litecoin") {
+      coin_js = litecoinjs
+    } else {
+      console.log("invalid currency")
+    }
+    const responseUnspent = await unspentApi(address)
+    const listP = responseUnspent.utxo
+    const script = coin_js.script()
     const addressScript = script.decodeRedeemScript(address.redeemscript)
     console.log("redeem script res ", addressScript)
 
@@ -571,26 +635,29 @@ async function accountWithdrawalFunc(address){
 
 async function unspentApi(address) {
     console.log("ipc main address: ", address)
-    try {
-        // const request = https.request(`https://api.logbin.org/api?address=${address}`, (response) => {
-        // console.log("im here")
-        // let data = '';
-        // response.on('data', (chunk) => {
-        //     data = data + chunk.toString();
-        // });
+    if (address.currency === 'woodcoin') {
+      try {
+          const response = await axios(`https://api.logbin.org/api?address=${address.address}`, {
+                  method: 'get',
+                  headers: {
+                      'Accept': 'application/json'
+                  }
+          });
 
-        // response.on('end', async () => {
-        //     const body = await JSON.parse(data);
-        //     console.log("unspent body: ", body.message.address)
-        //     win.webContents.send('unspent:address', body.message.address)
-        // });
-        // })
-
-        // request.on('error', (error) => {
-        //     console.log('An error', error);
-        // });
-        // request.end()
-        const response = await axios(`https://api.logbin.org/api?address=${address}`, {
+          console.log(response)
+          if (response.status === 200) {
+              const data = {
+                "utxo": response.data.message.address,
+                "currency": address.currency
+              }
+              return data
+          }
+      } catch(e) {
+          console.log("error : ", e)
+      }
+    } else if (address.currency === 'bitcoin') {
+      try {
+        const response = await axios(`https://chain.so/api/v3/unspent_outputs/BTC/${address.address}/1`, {
                 method: 'get',
                 headers: {
                     'Accept': 'application/json'
@@ -599,10 +666,38 @@ async function unspentApi(address) {
 
         console.log(response)
         if (response.status === 200) {
-            return response.data.message.address
+          const data = {
+            "utxo": response.data.outputs,
+            "currency": address.currency
+          }
+          return data
         }
-    } catch(e) {
-        console.log("error : ", e)
+      } catch(e) {
+          console.log("error : ", e)
+      }
+    } else if (address.currency === 'litecoin') {
+      try {
+        const response = await axios(`https://chain.so/api/v3/unspent_outputs/LTC/${address.address}/1`, {
+                method: 'get',
+                headers: {
+                    'Accept': 'application/json'
+                }
+        });
+
+        console.log(response)
+        if (response.status === 200) {
+          const data = {
+            "utxo": response.data.outputs,
+            "currency": address.currency
+          }
+          return data
+        }
+      } catch(e) {
+          console.log("error : ", e)
+      }
+    } else {
+      console.log("Chain not found")
+      return
     }
 }
 
@@ -1006,7 +1101,7 @@ async function accountBankerData() {
     active.appendChild(span);
 
     selectOptions.forEach((option) => {
-        //console.log(option)
+        // console.log(option)
         let text = option.innerText;
         if(option.selected){
             let tag = document.createElement('a');
@@ -1034,11 +1129,7 @@ async function accountBankerData() {
 
     select.parentElement.append(newSelect);
     span.appendChild(select);
-
-    // newSelect.appendChild(select);
-    //select.style.display = "none";
-    //1
-    //document.querySelectorAll('.selectMultiple ul li').forEach((li) => {
+    
     document.querySelector('.selectMultiple ul').addEventListener('click', (e) => {
         let li = e.target.closest('li');
         if(!li){return;}
