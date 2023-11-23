@@ -567,8 +567,19 @@ async function accountWithdrawalFunc(address){
     if (unspentAmountTotal == 0) {
         if (listP) {
             for (let i = 0; i < listP.length; i++) {
-                console.log(listP[i].txid)
-                unspentAmountTotal += listP[i].amount / 100000000
+              let listPAmount;
+              let listPTXID;
+              let listPvout
+              if (address.currency === 'woodcoin') {
+                listPAmount = listP[i].amount / 100000000
+                listPTXID = listP[i].txid
+                listPvout = listP[i].vout
+              } else {
+                listPAmount = listP[i].value
+                listPTXID = listP[i].hash
+                listPvout = listP[i].index
+              }
+              unspentAmountTotal += Number(listPAmount)
                 // let row = tableBody.insertRow()
                 // let transactionId = row.insertCell(0)
                 // transactionId.innerHTML = listP[i].txid.substring(0,30)+"..."
@@ -585,23 +596,23 @@ async function accountWithdrawalFunc(address){
                 div.setAttribute('id', 'inner-unspent')
                 div.setAttribute('class', 'grid md:grid-cols-4 gap-3')
                 let input1 = document.createElement('input')
-                input1.setAttribute('class', 'col-span-2 txid-withdraw text-black')
+                input1.setAttribute('class', 'col-span-2 txid-withdraw text-black text-base text-normal p-1')
                 input1.setAttribute('id', 'txid-withdraw')
-                input1.value = listP[i].txid
+                input1.value = listPTXID
                 let input2 = document.createElement('input')
                 input2.setAttribute('class', 'text-black')
                 input2.setAttribute('class', 'hidden')
                 input2.setAttribute('id', 'vout-withdraw')
-                input2.value = listP[i].vout
+                input2.value = listPvout
                 let input3 = document.createElement('input')
-                input3.setAttribute('class', 'text-black')
+                input3.setAttribute('class', 'text-black text-base text-normal')
                 input3.setAttribute('class', 'hidden')
                 input3.setAttribute('id', 'script-withdraw')
                 input3.value = addressScript.redeemscript
                 let input4 = document.createElement('input')
-                input4.setAttribute('class', 'col-span-1 text-black')
+                input4.setAttribute('class', 'col-span-1 text-black text-base text-normal p-1')
                 input4.setAttribute('id', 'amount-withdraw')
-                input4.value = listP[i].amount / 100000000
+                input4.value = listPAmount
                 let input5 = document.createElement('input')
                 input5.setAttribute('class', 'hidden')
                 input5.value = address.redeemscript
@@ -609,13 +620,22 @@ async function accountWithdrawalFunc(address){
                 check.setAttribute('type', 'checkbox')
                 check.setAttribute('checked', '')
                 check.addEventListener('change', (e, evt) => {
-                console.log("e testing ", e)
-                console.log("evt testing ", evt)
-                if(e.target.defaultChecked) {
+                  console.log("e testing ", e)
+                  console.log("evt testing ", evt)
+                  let withdrawAmt = getTotalWithdrawalAmt()
+
+                  if(e.target.defaultChecked) {
                     check.removeAttribute('checked', '')
-                } else {
+                    console.log("subtract this amount: ", input4.value)
+
+                    unspentAmountTotal -= parseFloat(input4.value)
+                    withdrawalFee.value = (unspentAmountTotal - withdrawAmt).toFixed(8)
+                  } else {
                     check.setAttribute('checked', '')
-                }
+                    console.log("add this amount: ", input4.value)
+                    unspentAmountTotal += parseFloat(input4.value)
+                    withdrawalFee.value = (unspentAmountTotal - withdrawAmt).toFixed(8)
+                  }
                 })
                 div.appendChild(input1)
                 div.appendChild(input2)
@@ -631,6 +651,17 @@ async function accountWithdrawalFunc(address){
     console.log("total unspent: ", unspentAmountTotal)
     withdrawalFee.value = unspentAmountTotal
 
+  }
+
+  function getTotalWithdrawalAmt() {
+    const getuserinput = document.querySelectorAll('#address-keys')
+    let totalOutput = 0
+  
+    for (let i = 0; i < getuserinput.length; i++) {
+      let amount = getuserinput[i].children[1].value
+      totalOutput += Number(amount)
+    }
+    return totalOutput
   }
 
 async function unspentApi(address) {
@@ -1897,7 +1928,7 @@ async function contractnew (options) {
         totalOutput += Number(amount)
       }
       TOTAL_AMOUNT_TO_WITHDRAW = totalOutput
-      withdrawalFee.value = unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW
+      withdrawalFee.value = (unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW).toFixed(8)
     }
   }
 
@@ -1912,13 +1943,13 @@ async function contractnew (options) {
 
     //TOTAL_AMOUNT_TO_WITHDRAW += Number(amount)
     TOTAL_AMOUNT_TO_WITHDRAW = totalOutput
-    withdrawalFee.value = unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW
+    withdrawalFee.value = (unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW).toFixed(8)
   }
 
   function amountOnchangeSubtract(amount) {
 
     TOTAL_AMOUNT_TO_WITHDRAW -= Number(amount)
-    withdrawalFee.value = unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW
+    withdrawalFee.value = (unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW).toFixed(8)
     console.log("amount to subtract: ", amount)
     console.log("withdrawal fee: ", unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW)
   }
@@ -1932,7 +1963,7 @@ async function contractnew (options) {
     let withdrawFeeInput = document.getElementById("withdraw-fee")
     let userInputtedFee = withdrawFeeInput.value
 
-    let change = unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW
+    let change = (unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW).toFixed(8)
     console.log("change: ", change)
 
     if (unspentAmountTotal < TOTAL_AMOUNT_TO_WITHDRAW) {
@@ -1962,6 +1993,8 @@ async function contractnew (options) {
   }
 
   async function generateClaim(changeAmount) {
+    console.log("generate claim")
+    console.log("account currency: ", ACCOUNT_CURRENCY)
     //e.preventDefault()
     // const txid = document.getElementById('txid-withdraw').value
     // const vout = document.getElementById('vout-withdraw').value
@@ -1978,7 +2011,19 @@ async function contractnew (options) {
     // const out = await tx.serialize()
     // console.log("tx serialize", out)
     // console.log("decode tx serialize", tx.deserialize(out))
-    let tx = coinjs.transaction()
+    let coin_js
+    if (ACCOUNT_CURRENCY === "woodcoin") {
+      coin_js = coinjs
+    } else if (ACCOUNT_CURRENCY === "bitcoin") {
+      coin_js = bitcoinjs
+    } else if (ACCOUNT_CURRENCY === "litecoin") {
+      coin_js = litecoinjs
+    } else {
+      console.log("invalid currency")
+      return
+    }
+
+    let tx = coin_js.transaction()
     const getunspent = document.querySelectorAll('#inner-unspent')
     const getuserinput = document.querySelectorAll('#address-keys')
     //const changeAddressinput = document.getElementById('change-address')
@@ -2177,8 +2222,13 @@ async function contractnew (options) {
 
       const generateButton = document.getElementById('generate-request-signature-message')
       generateButton.addEventListener('click', function() {
-        requestSignatureWindow(txRedeemTransaction, accountSigFilter)
+        selectBankerToSign(txRedeemTransaction, accountSigFilter)
       }, false)
+    } else {
+      console.log("userunspentindex: ", userunspentindex)
+      console.log("getunspent.length -1: ", getunspent.length -1)
+      console.log("userinputindex: ", userinputindex)
+      console.log("getuserinput.length -1: ", getuserinput.length -1)
     }
 
 
@@ -2186,6 +2236,59 @@ async function contractnew (options) {
     //   alertError("You are spending more than you have")
     // }
 
+  }
+
+  function selectBankerToSign(tx, account, withdrawalID=null) {
+
+    let accountDetails = document.getElementById('account-details')
+    let accountWithdrawal = document.getElementById('account-withdrawal')
+    let accountActions = document.getElementById('account-actions')
+    let withdrawalReference = document.getElementById('withdraw-reference')
+    let reqBankersSelect = document.getElementById('request-sig-banker-select')
+    let messageSignature = document.getElementById('request-sig-message')
+    messageSignature.innerHTML = ""
+    accountDetails.classList.add('hidden')
+    accountWithdrawal.classList.add('hidden')
+    accountActions.classList.add('hidden')
+    withdrawalReference.classList.add('hidden')
+    reqBankersSelect.classList.remove('hidden')
+  
+    const accountParse = account
+  
+    let selectBankers = document.getElementById("next-banker-to-sign")
+    var select =  document.getElementById("select-bankers-to-sign");
+    select.innerHTML = ''
+    select.dataset.placeholder = 'Choose Bankers'
+  
+    let bankersArray = accountParse[0].bankers
+  
+    const el = document.createElement("option");
+    el.textContent = "Select a banker";
+    el.value = "";
+    select.appendChild(el);
+    bankersArray.forEach((banker, i) => {
+      const opt = banker.banker_email;
+      const pub = banker.pubkey;
+      const el = document.createElement("option");
+      el.textContent = opt;
+      el.value = JSON.stringify(banker);
+      select.appendChild(el);
+    });
+  
+    let generateBtn = document.getElementById('generate-sign-message')
+    generateBtn.addEventListener('click', () => {
+      let selectBanker = document.getElementById('select-bankers-to-sign')
+      const banker = select.options[select.selectedIndex].value;
+      console.log("banker: ", banker)
+  
+      if (banker) {
+        let parsedBanker = JSON.parse(banker)
+        requestSignatureWindow(tx, account, parsedBanker)
+      } else {
+        alertError("Please select a banker.")
+      }
+    })
+  
   }
 
   async function getredeemscriptRedeemscript(options) {
@@ -2218,22 +2321,36 @@ function closeSendSignatureScreen() {
 
 
   function requestSignatureWindow(tx, account) {
-    let accountDetails = document.getElementById('account-details')
-    let accountWithdrawal = document.getElementById('account-withdrawal')
-    let accountActions = document.getElementById('account-actions')
-    let withdrawalReference = document.getElementById('withdraw-reference')
+    // Clear withdraw address and amount input
+    let withdrawAddrInput = document.getElementById('withdraw-address')
+    let withdrawAmtInput = document.getElementById('withdraw-amount')
+    let withdrawFeeInput = document.getElementById('withdraw-fee')
+
+    withdrawAddrInput.value = ""
+    withdrawAmtInput.value = ""
+    withdrawAmtInput.value = 0
+
+    let withdrawalID = Date.now()
+    // let accountDetails = document.getElementById('account-details')
+    // let accountWithdrawal = document.getElementById('account-withdrawal')
+    // let accountActions = document.getElementById('account-actions')
+    // let withdrawalReference = document.getElementById('withdraw-reference')
     let sendSignature = document.getElementById('send-signature')
     let messageSignature = document.getElementById('request-sig-message')
-    accountDetails.classList.add('hidden')
-    accountWithdrawal.classList.add('hidden')
-    accountActions.classList.add('hidden')
-    withdrawalReference.classList.add('hidden')
+    let selectBankerScreen = document.getElementById('request-sig-banker-select')
+    messageSignature.innerHTML = ""
+    // accountDetails.classList.add('hidden')
+    // accountWithdrawal.classList.add('hidden')
+    // accountActions.classList.add('hidden')
+    // withdrawalReference.classList.add('hidden')
+    selectBankerScreen.classList.add('hidden')
     sendSignature.classList.remove('hidden')
     console.log("tx: ", tx)
     console.log("account: ", typeof(account))
     const accountParse = account
     console.log("account parse: ", accountParse)
     const br = document.createElement('br')
+
     const p1 = document.createElement('p')
     p1.innerHTML = "Please copy the line below and send it to" + " " + accountParse[0].bankers[0].banker_email
     const p2 = document.createElement('p')
@@ -2265,15 +2382,19 @@ function closeSendSignatureScreen() {
     const p15 = document.createElement('p')
     p15.innerHTML = '"contract_name":' + '"' + accountParse[0].contract_name + '",'
     const p16 = document.createElement('p')
-    p16.innerHTML = "-----End fscb message-----"
+    p16.innerHTML = '"withdrawal_id":' + '"' + withdrawalID + '"}'
+    const p17 = document.createElement('p')
+    p17.innerHTML = "-----End fscb message-----"
 
     const copyToClipboardText = p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML + '\n' + p6.innerHTML + '\n' + p7.innerHTML + '\n' + p8.innerHTML + '\n' + p9.innerHTML + '\n' + p10.innerHTML + '\n' + p11.innerHTML + '\n' + p12.innerHTML + '\n' + p13.innerHTML + '\n' + p14.innerHTML + '\n' + p15.innerHTML
-     + '\n' + p16.innerHTML + '\n' + p17.innerHTML
+    + '\n' + p16.innerHTML + '\n' + p17.innerHTML
     let copyButton = document.createElement('img')
     copyButton.setAttribute('src', './images/copy_button.png')
+    copyButton.setAttribute('width', '50')
+    copyButton.setAttribute('height', '50')
     copyButton.setAttribute('class', 'inline-flex absolute right-10 px-4 cursor-pointer hover:scale-125 transition duration-500')
     copyButton.addEventListener("click", function() {
-      navigator.clipboard.writeText(copyToClipboardText)
+      ipcRenderer.send('message:copy', copyToClipboardText)
       alertSuccess("Message successfully copied in clipboard.")
     }, false);
 
@@ -2296,6 +2417,7 @@ function closeSendSignatureScreen() {
     messageSignature.appendChild(p13)
     messageSignature.appendChild(p14)
     messageSignature.appendChild(p16)
+    messageSignature.appendChild(p17)
     const data = {
       "banker_id": accountParse[0].bankers[0].banker_id,
       "banker_name": accountParse[0].bankers[0].banker_name,
@@ -2306,7 +2428,13 @@ function closeSendSignatureScreen() {
       "action": "Request for signature"
     }
     console.log("action data: ", data)
-    accountParse[0].signatures.push(data)
+    const newWithdrawal = {
+      id: withdrawalID,
+      signatures: [
+        data
+      ]
+    }
+    accountParse[0].withdrawals = newWithdrawal
     // ipcRenderer.send('signature:encode', {"id": accountParse[0].contract_id, "contract": accountParse[0]})
     // console.log("new account parse", JSON.stringify(accountParse[0]))
   }
