@@ -1986,7 +1986,7 @@ async function ownerShowBankerSignatureMessage(message) {
   copyButton.setAttribute('src', './assets/imgs/copy_button.png')
   copyButton.setAttribute('width', '50')
   copyButton.setAttribute('height', '50')
-  copyButton.setAttribute('class', 'inline-flex absolute right-10 px-4 cursor-pointer hover:scale-125 transition duration-500')
+  copyButton.setAttribute('class', 'px-2 cursor-pointer hover:scale-125 transition duration-500')
   copyButton.addEventListener("click", async function() {
     await Clipboard.write({
       string: copyToClipboardText
@@ -2390,6 +2390,16 @@ function finalizeNewKeys(evt){
     const importAgain = document.getElementById('import-again-button')
     importAgain.addEventListener('click', importAgainShow)
 };
+
+function importAgainShow(div, button) {
+  const textId = document.getElementById('import-show')
+  const textImport = document.getElementById('import-area')
+  const textBody = document.getElementById('text-show')
+  textId.classList.add('hidden')
+  textImport.classList.remove('hidden')
+  textBody.innerHTML = ''
+
+}
 
 function isKeyValid(hex) {
     var key = hex.toString();
