@@ -41,15 +41,49 @@
     <link rel="icon" type="image/x-icon" href="./assets/icon/favicon.ico" />
     <link rel="manifest" href="./manifest.json" />
     <link rel="stylesheet" href="./css/style.css" />
+
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
     <meta name="theme-color" content="#31d53d" />
   </head>
   <body class="bg-black">
     <div class="xl:container mx-auto">
-      <div class="mx-auto grid h-auto grid-cols-12">
-        <aside class="col-span-3" id="aside">
-          <div class="items-center text-center">
-            <img src="./assets/imgs/fscb_logo.png" alt="fscb">
-            <button id="import-text-button" class="items-center px-10 py-2.5 text-base font-medium text-center text-black bg-gray-300 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-gray-300 hover:bg-gray-300">Import Text</button>
+      <!-- <div x-data="{ open: false }" class="flex flex-col max-w-screen-xl px-4 mx-auto md:items-center md:justify-between md:flex-row md:px-6 lg:px-8">
+        <div class="p-4 flex flex-row items-center justify-between">
+          <a href="#" ><img src="./assets/imgs/fscb_mobile.png"></a>
+          <button class="md:hidden rounded-lg focus:outline-none focus:shadow-outline" @click="open = !open">
+            <svg fill="#ABB2B9" viewBox="0 0 20 20" class="w-6 h-6">
+              <path x-show="!open" fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM9 15a1 1 0 011-1h6a1 1 0 110 2h-6a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+              <path x-show="open" fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+            </svg>
+
+          </button>
+        </div>
+        <nav :class="{'flex': open, 'hidden': !open}" class="flex-col flex-grow pb-4 md:pb-0 hidden md:flex md:justify-end md:flex-row">
+          <ul class='list-outside list-disc ml-12 mt-8'>
+            <ul id="tabs">
+              <li class="list-disc marker:text-orange-500 -mt-0 px-4 text-white font-semibold text-xl py-2 rounded-t" id="account-list-tab">
+                <a class="getlistClick" href="#first">Account List</a>
+              </li>
+              <hr class="bg-gray-500 opacity-10 dark:opacity-50"/>
+              <li class="list-disc marker:text-red-500 px-4 text-white font-semibold text-xl py-2 rounded-t"><a class="getbankerClick" href="#second">New Account</a></li>
+              <hr class="bg-gray-500 opacity-10 dark:opacity-50"/>
+              <li class="list-disc marker:text-gray-500 px-4 text-white font-semibold text-xl py-2 rounded-t"><a href="#addbanker">Add Banker</a></li>
+              <hr class="bg-gray-500 opacity-10 dark:opacity-50"/>
+              <li class="list-disc marker:text-green-500 px-4 text-white font-semibold text-xl py-2 rounded-t"><a href="#third">Instructions</a></li>
+              <hr class="bg-gray-500 opacity-10 dark:opacity-50"/>
+              <li class="list-disc marker:text-purple-500 px-4 text-white font-semibold text-xl py-2 rounded-t"><a href="#fourth">About FSCB</a></li>
+              <hr class="bg-gray-500 opacity-10 dark:opacity-50"/>
+              <li class="list-disc marker:text-gray-800 px-4 text-white font-semibold text-xl py-2 rounded-t"><a href="#sixth">Backup</a></li>
+            </ul>
+          </ul>
+        </nav>
+      </div> -->
+      <div class="mx-auto grid h-auto grid-cols-12 border-x-2 border-x-gray-900">
+
+        <aside class="hidden md:block md:col-span-3 " id="aside">
+          <div class="text-center">
+            <img src="./assets/imgs/FSCB_logo.png" alt="fscb" class="mx-auto mt-4">
+            <button id="import-text-button" class="items-center px-10 py-2.5 text-base font-medium text-center text-black bg-gray-300 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-gray-300 hover:bg-gray-300 mt-8">Import Text</button>
           </div>
           <!-- <div class="ml-5 w-1"> -->
             <!-- <label
@@ -85,17 +119,21 @@
 
 
         <!-- Tab Contents -->
-        <div class="col-span-9 h-auto" id="tab-contents" >
+        <div class="col-span-12 md:col-span-9 h-screen bg-[#1a1a1a]" id="tab-contents" >
           <div id="importText" class="hidden p-4">
             <div class="mx-auto max-h-80" id="import-area">
               <p class="text-xl text-white font-bold">Welcome to FSCB</p>
               <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
               <form id="import-text-form">
-                <textarea name="" id="import-text" cols="30" rows="10" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Paste text here..."></textarea>
-                <button type="submit" class="inline-flex items-center px-12 py-3 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Import</button>
+                <textarea name="" id="import-text" cols="30" rows="20" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Paste text here..."></textarea>
+                <div class="flex justify-end">
+                  <button type="submit" class="items-center px-12 py-3 text-sm font-medium text-center mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Import</button>
+                </div>
               </form>
             </div>
             <div class="mx-auto hidden" id="import-show">
+              <p class="text-xl text-white font-bold">Request for Banker</p>
+              <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
               <div id="text-show"></div>
               <!-- <p>please copy the line below and send it to.</p><span id="email-show"></span><br /><br>
               <span id="creator-name"></span><p>is requesting for you to become a banker</p><br>
@@ -154,7 +192,9 @@
                 </div>
                 <div>
                   <input type="text" id="pivkey-hex" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                  <button id="banker-generate-privkey" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center absolute right-8 mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Generate</button>
+                  <div class="flex justify-end">
+                    <button id="banker-generate-privkey" class="items-center px-5 py-2.5 text-sm font-medium text-center mt-5 text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Generate</button>
+                  </div>
                 </div>
 
                 <div class="mt-20 text-base font-bold"><p>WIF Private Key</p></div>
@@ -180,7 +220,9 @@
                    When you are satisfied with the private key, and have written it and saved it redundantly, press "finalize"</p>
                 </div>
 
-                <button id="banker-finalize-keys" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center absolute right-8 mt-4  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Finalize</button>
+                <div class="flex justify-end">
+                  <button id="banker-finalize-keys" class="items-center px-5 py-2.5 text-sm font-medium text-center mt-4  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Finalize</button>
+                </div>
               </div>
             </div>
             <!--End of Bankers View - Private key generation-->
@@ -219,7 +261,9 @@
                 <p>Enter WIF Private key</p>
                 <input type="text" id="banker-pivkey-for-signature" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
               </div>
-              <button id="banker-sign-button" class="inline-flex items-center px-10 py-2.5 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Sign</button>
+              <div class="flex justify-end">
+                <button id="banker-sign-button" class="items-center px-10 py-2.5 text-sm font-medium text-center mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Sign</button>
+              </div>
             </div>
             <!--End of Bankers View - Verify Withdrawal-->
 
@@ -230,7 +274,7 @@
               <p class="text-l text-white my-1" id="sign-response-title"></p>
               <div class="bg-white font-normal text-base p-8 max-h-[420px] overflow-y-auto" id="banker-message-signtx-body">
               </div>
-              <div id="banker-message-signtx-close-button"></div>
+              <div id="banker-message-signtx-close-button" class="flex justify-end"></div>
             </div>
             <!--End of Bankers view - Message to send - Sign tx Response-->
 
@@ -264,7 +308,9 @@
                 >
                 </select>
               </div>
-              <button id="generate-next-sign-message" class="inline-flex items-center px-12 py-3 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Generate</button>
+              <div class="flex justify-end">
+                <button id="generate-next-sign-message" class="items-center px-12 py-3 text-sm font-medium text-center mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Generate</button>
+              </div>
             </div>
             <!-- End of Owners view - Next banker for signature-->
 
@@ -341,11 +387,13 @@
                   </tbody>
                 </table>
               </div>
-              <button
-                id="account-actions-back-btn"
-                class="inline-flex items-center px-10 py-2.5 text-base font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">
-                Back
-              </button>
+              <div class="flex justify-end">
+                <button
+                  id="account-actions-back-btn"
+                  class="items-center px-10 py-2.5 text-base font-medium text-center mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">
+                  Back
+                </button>
+              </div>
             </div>
             <div id="account-withdrawal" class="hidden text-white mt-4 text-xl">
               Withdrawal
@@ -367,7 +415,7 @@
                <form id="withdraw-submit" class="mt-28">
                   <div id="address-amount">
                      <div class="flex justify-end">
-                       <p id="donate-button" class="cursor-pointer text-base relative right-16 text-orange-500">Donate</p>
+                       <p id="donate-button" class="cursor-pointer text-base text-orange-500">Donate</p>
                      </div>
                      <div class="flex mt-5 gap-2">
                        <div class="flex-auto w-64 text-sm"><label>Address</label></div>
@@ -408,11 +456,13 @@
 
                     </div>
                   </div>
-                  <button
-                    type="submit"
-                    class="cursor-pointer inline-flex items-center px-10 py-2.5 text-sm font-medium text-center absolute w-32 right-16 mt-2 text-white bg-orange-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500 rounded-full">
-                    Submit
-                  </button>
+                  <div class="flex justify-end">
+                    <button
+                      type="submit"
+                      class="cursor-pointer items-center px-10 py-2.5 text-sm font-medium text-center w-32 mt-2 text-white bg-orange-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500 rounded-full">
+                      Submit
+                    </button>
+                  </div>
 
                 </form>
             </div>
@@ -445,11 +495,13 @@
                   </tbody>
                 </table>
               </div>
-              <button
-                id="generate-request-signature-message"
-                class="inline-flex items-center px-5 py-2.5 text-base font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">
-                Generate
-              </button>
+              <div class="flex justify-end">
+                <button
+                  id="generate-request-signature-message"
+                  class="items-center px-5 py-2.5 text-base font-medium text-center mt-5 text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">
+                  Generate
+                </button>
+              </div>
             </div>
             <div id="request-sig-banker-select" class="hidden">
               <p class="text-xl text-white font-bold">Select banker</p>
@@ -463,17 +515,21 @@
                 >
                 </select>
               </div>
-              <button id="generate-sign-message" class="inline-flex items-center px-12 py-3 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Generate</button>
+              <div class="flex justify-end">
+                <button id="generate-sign-message" class="items-center px-12 py-3 text-sm font-medium text-center mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Generate</button>
+              </div>
             </div>
             <div id="send-signature" class="hidden">
               <h1 class="text-white">Transaction Signature</h1>
               <br>
               <div id="request-sig-message" class="bg-white text-gray-600 break-all p-8 text-base font-normal max-h-[420px] overflow-y-auto"></div>
-              <button
-                id="send-signature-close-btn"
-                class="inline-flex items-center px-5 py-2.5 text-base font-medium text-center absolute right-8 my-3 text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">
-                Close
-              </button>
+              <div class="flex justify-end">
+                <button
+                  id="send-signature-close-btn"
+                  class="items-center px-5 py-2.5 text-base font-medium text-center my-3 text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">
+                  Close
+                </button>
+              </div>
             </div>
           </div>
           <div id="second" class="p-9 hidden text-white text-xl font-bold mt-1">
@@ -635,30 +691,32 @@
             Backup
             <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
 
-            <div id="backup-btn-container">
-              <button id="export-btn" class="inline-flex items-center px-12 py-3 text-sm font-medium text-center absolute right-5 mt-5 text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Export Data</button>
+            <div id="backup-btn-container" class="flex justify-end">
+              <button id="export-btn" class="items-center px-12 py-3 text-sm font-medium text-center mt-5 text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Export Data</button>
             </div>
             <div id="backup-message-container" class="hidden">
               <p class="mt-8 text-base text-normal">This is your FSCB backup. Please copy the line below and save it.</p>
               <div class="mt-2 bg-white font-normal text-base p-8 max-h-[420px] overflow-y-auto" id="backup-message">
               </div>
 
-              <button id="close-backup-btn" class="inline-flex items-center px-12 py-3 text-sm font-medium text-center absolute right-5 mt-5 text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Close</button>
+              <div class="flex justify-end">
+                <button id="close-backup-btn" class="items-center px-12 py-3 text-sm font-medium text-center mt-5 text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Close</button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <div id="user-profile" class="hidden h-screen bg-[#1a1a1a] justify-center items-center">
+      <div id="user-profile" class="hidden h-screen bg-[#1a1a1a] flex justify-center items-center">
         <form id="user-profile-form" class="text-white">
-          <div class="pl-7">
-            <img src="./assets/imgs/fscb_logo_round.png" alt="fscb">
+          <div class="flex justify-center">
+            <img src="./assets/imgs/fscb_01.png" alt="fscb" class="mx-auto">
           </div>
            <div class="font-semibold mt-8">
             <!--span>Please do fill up the form</span-->
            </div>
-          <input input type="text" id="user-name" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block relative w-96 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-2" placeholder="Username">
-          <input input type="email" id="user-email" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block relative w-96 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-2" placeholder="Users E-mail">
-          <button id="add-user-profile-btn" type="submit" class="items-center relative px-40 py-3 text-md font-medium text-center text-white bg-orange-500 focus:ring-4 focus:ring-orange-500 dark:focus:bg-orange-500 hover:bg-orange mt-5 ml-2 rounded-full">Submit</button>
+          <input input type="text" id="user-name" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-96 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add mt-2 rounded" placeholder="Username">
+          <input input type="email" id="user-email" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-96 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add mt-5 rounded" placeholder="Users E-mail">
+          <button id="add-user-profile-btn" type="submit" class="items-center px-40 py-3 text-md font-medium text-center text-white bg-orange-500 focus:ring-4 focus:ring-orange-500 dark:focus:bg-orange-500 hover:bg-orange mt-5 rounded-full w-full">Submit</button>
         </form>
       </div>
     </div>

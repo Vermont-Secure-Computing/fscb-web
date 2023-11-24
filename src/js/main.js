@@ -2331,10 +2331,15 @@ function finalizeNewKeys(evt){
     const textImportArea = document.getElementById('import-text')
     const div = document.createElement('div')
     div.setAttribute('class', 'bg-white p-3 rounded-md')
+
+    const btnContainer = document.createElement('div')
+    btnContainer.setAttribute('class', 'flex justify-end')
     const button = document.createElement('button')
-    button.setAttribute('class', 'inline-flex items-center px-10 py-3 text-sm font-medium text-center text-white bg-orange-500 focus:ring-4 focus:ring-orange-500 dark:focus:bg-orange-500 hover:bg-orange absolute mt-5 right-10 rounded-full')
+    button.setAttribute('class', 'items-center px-10 py-3 text-sm font-medium text-center text-white bg-orange-500 focus:ring-4 focus:ring-orange-500 dark:focus:bg-orange-500 hover:bg-orange mt-5 rounded-full')
     button.setAttribute('id', "import-again-button")
-    button.textContent = "Import Again"
+    button.textContent = "Clear"
+    btnContainer.appendChild(button)
+
     const p = document.createElement('p')
     const br = document.createElement('br')
     const p1 = document.createElement('p')
@@ -2355,18 +2360,18 @@ function finalizeNewKeys(evt){
     p4.classList.add('whitespace-pre-wrap', 'break-all')
 
     const copyToClipboardText = p1.innerHTML + '\n' + p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML
+    let copyButtonContainer = document.createElement('div')
+    copyButtonContainer.setAttribute('class', 'flex justify-end')
     let copyButton = document.createElement('img')
     copyButton.setAttribute('src', './assets/imgs/copy_button.png')
-    copyButton.setAttribute('class', 'inline-flex absolute right-10 px-2 cursor-pointer hover:scale-125 transition duration-500')
-    copyButton.addEventListener("click", async function() {
-      // navigator.clipboard.writeText(copyToClipboardText)
-      await Clipboard.write({
-        string: copyToClipboardText
-      });
+    copyButton.setAttribute('class', 'px-2 cursor-pointer hover:scale-125 transition duration-500')
+    copyButton.addEventListener("click", function() {
+      navigator.clipboard.writeText(copyToClipboardText)
       alertSuccess("Message successfully copied in clipboard.")
     }, false);
 
-    div.appendChild(copyButton)
+    copyButtonContainer.appendChild(copyButton)
+    div.appendChild(copyButtonContainer)
     div.appendChild(p)
     div.appendChild(br)
     div.appendChild(p1)
@@ -2375,7 +2380,7 @@ function finalizeNewKeys(evt){
     div.appendChild(p4)
     div.appendChild(p5)
     textBody.appendChild(div)
-    textBody.appendChild(button)
+    textBody.appendChild(btnContainer)
     const importAgain = document.getElementById('import-again-button')
     importAgain.addEventListener('click', importAgainShow)
 };
@@ -3165,20 +3170,18 @@ function closeSendSignatureScreen() {
 
     const copyToClipboardText = p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML + '\n' + p6.innerHTML + '\n' + p7.innerHTML + '\n' + p8.innerHTML + '\n' + p9.innerHTML + '\n' + p10.innerHTML + '\n' + p11.innerHTML + '\n' + p12.innerHTML + '\n' + p13.innerHTML + '\n' + p14.innerHTML + '\n' + p15.innerHTML
     + '\n' + p16.innerHTML + '\n' + p17.innerHTML
+    let copyButtonContainer = document.createElement('div')
+    copyButtonContainer.setAttribute('class', 'flex justify-end')
     let copyButton = document.createElement('img')
     copyButton.setAttribute('src', './assets/imgs/copy_button.png')
-    copyButton.setAttribute('width', '50')
-    copyButton.setAttribute('height', '50')
-    copyButton.setAttribute('class', 'inline-flex absolute right-10 px-4 cursor-pointer hover:scale-125 transition duration-500')
-    copyButton.addEventListener("click", async function() {
-      await Clipboard.write({
-        string: copyToClipboardText
-      });
-      // ipcRenderer.send('message:copy', copyToClipboardText)
+    copyButton.setAttribute('class', 'px-2 cursor-pointer hover:scale-125 transition duration-500')
+    copyButton.addEventListener("click", function() {
+      navigator.clipboard.writeText(copyToClipboardText)
       alertSuccess("Message successfully copied in clipboard.")
     }, false);
 
-    messageSignature.appendChild(copyButton)
+    copyButtonContainer.appendChild(copyButton)
+    div.appendChild(copyButtonContainer)
     messageSignature.appendChild(p1)
     messageSignature.appendChild(br)
     messageSignature.appendChild(br)
