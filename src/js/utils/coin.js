@@ -45,6 +45,24 @@
 		};
 	}
 
+	/* generate a private and public keypair, with address and WIF address from privkey hex 64 chars*/
+	coinjs.newKeysFromHex = function(hex){
+
+		var key = hex.toString();
+		var isValidFormat = /^[0-9a-fA-F]{64}$/.test(key)
+
+		//this.compressed = true
+		var pubkey = this.newPubkey(hex);
+
+		return {
+			'privkey': hex, // privkey wif 51 chars
+			'pubkey': pubkey, // pubkey compressed 130 chars
+			'address': this.pubkey2address(pubkey),
+			'wif': this.privkey2wif(hex), // privkey hex 64 chars
+			'compressed': this.compressed
+		};
+	}
+
 	/* generate a new random private key */
 	coinjs.newPrivkey = function(){
 		
