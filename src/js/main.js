@@ -1,6 +1,7 @@
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import axios from 'axios';
 import Toastify from 'toastify-js';
+import { Clipboard } from '@capacitor/clipboard';
 
 
 
@@ -649,7 +650,7 @@ async function accountWithdrawalFunc(address){
 
     }
     console.log("total unspent: ", unspentAmountTotal)
-    withdrawalFee.value = unspentAmountTotal
+    withdrawalFee.value = (unspentAmountTotal).toFixed(8)
 
   }
 
@@ -977,8 +978,10 @@ function showBankerRequestSend(data) {
     let copyButton = document.createElement('img')
     copyButton.setAttribute('src', './assets/imgs/copy_button.png')
     copyButton.setAttribute('class', 'px-2 cursor-pointer hover:scale-125 transition duration-500')
-    copyButton.addEventListener("click", function() {
-      navigator.clipboard.writeText(copyToClipboardText)
+    copyButton.addEventListener("click", async function() {
+      await Clipboard.write({
+        string: copyToClipboardText
+      });
       alertSuccess("Message successfully copied in clipboard.")
     }, false);
 
@@ -1470,7 +1473,8 @@ function addOrSign(options) {
       bankerPubkeyResponse(banker)
     }else if (banker.message.includes("request-signature")) {
       console.log("request signature")
-      win.webContents.send('request:banker-signature', banker)
+      // win.webContents.send('request:banker-signature', banker)
+      bankerSignatureRequest(banker)
     } else if (banker.message.includes("response-signature")) {
       console.log("response signature")
       bankerSignatureResponse(banker)
@@ -1482,6 +1486,776 @@ function addOrSign(options) {
       console.log("signature")
     }
   }
+
+/* response banker signature */
+async function bankerSignatureResponse(message) {
+  console.log("message banker signature ", message)
+  const bankerCheckResult = await readdir('data.json');
+  if (bankerCheckResult) {
+    const dataJson = await Filesystem.readFile({
+        path: 'data/data.json',
+        directory: Directory.Documents,
+        encoding: Encoding.UTF8,
+    });
+    // console.log(dataJson)
+    const accounts = dataJson.data
+    console.log(accounts)
+    let accountID = message.id
+    let bankerID = message.banker_id
+    let next_banker
+
+		for (const [key, value] of Object.entries(accounts)) {
+      console.log("account value ", value)
+      let account = value
+      if (account.id == accountID) {
+				for (const [index, withdrawal] of account.withdrawals.entries()){
+					if (withdrawal.id == message.withdrawal_id){
+			    	for (const [index, signature] of withdrawal.signatures.entries()) {
+				      if(signature.banker_id == bankerID) {
+				        signature.transaction_id = message.transaction_id
+				        signature.status = "SIGNED"
+				        const date_signed = new Date()
+				        signature.date_signed = date_signed
+
+				        // const updatedAccounts = JSON.stringify(accounts, null, 2)
+				        // fs.writeFile(homedir + "/data/data.json"
+				        //   , updatedAccounts, function writeJson(err) {
+				        //   if (err)  {
+				        //     console.log(err)
+				        //   } else {
+				        //     console.log("accounts updated")
+				        //     // check number of signatures needed
+								// 		const signatures = withdrawal.signatures.filter(val => val.transaction_id != "");
+								// 		console.log("signatures: ", signatures);
+				        //     if (signatures.length == account.signature_nedded) {
+				        //       console.log("ready to broadcast")
+				        //       win.webContents.send('withdrawal:ready-to-broadcast', message)
+				        //     } else {
+				        //       console.log("request signature to next banker")
+								// 			let data = {
+								// 				"account": account,
+								// 				"message": message
+								// 			}
+								// 			win.webContents.send('response:banker-signature', data)
+
+				        //     }
+				        //   }
+				        // });
+                const writeAccount = Filesystem.writeFile({
+                    path: 'data/data.json',
+                    data: accounts,
+                    directory: Directory.Documents,
+                    encoding: Encoding.UTF8,
+                });
+                if (writeAccount.uri) {
+                  console.log("accounts updated")
+                  // check number of signatures needed
+                  const signatures = withdrawal.signatures.filter(val => val.transaction_id != "");
+                  console.log("signatures: ", signatures);
+                  if (signatures.length == account.signature_nedded) {
+                    console.log("ready to broadcast")
+                    // win.webContents.send('withdrawal:ready-to-broadcast', message)
+                    withdrawReadyToBroadcast(message)
+                  } else {
+                    console.log("request signature to next banker")
+                    let data = {
+                      "account": account,
+                      "message": message
+                    }
+                    // win.webContents.send('response:banker-signature', data)
+                    responseBankerSignture(data)
+                  }
+                }
+				      }
+			    	}
+					}
+				}
+			}
+		}
+  }
+}
+
+/* show user transaction ready for broadcast */
+async function withdrawReadyToBroadcast(message) {
+  ownerWithdrawalBroadcast.classList.remove('hidden')
+  importArea.classList.add('hidden')
+
+  let withdrawalTxId = document.getElementById('owner-withdrawal-txid-for-broadcast')
+  withdrawalTxId.innerHTML = message.transaction_id
+
+  let broadcastButton = document.getElementById("owner-withdrawal-broadcast-button")
+  broadcastButton.addEventListener('click', () => {
+    // ipcRenderer.send('withdrawal:api', message)
+    withdrawalApi(message)
+  })
+
+  let closeButton = document.getElementById("owner-withdrawal-close-button")
+  closeButton.addEventListener('click', () => {
+    console.log("close button")
+
+    importArea.classList.remove('hidden')
+    ownerWithdrawalBroadcast.classList.add('hidden')
+    importText.value = ""
+    withdrawalTxId.innerHTML = ""
+
+    showImportListScreen()
+  })
+}
+
+/* broadcast transaction */
+async function withdrawalApi(message) {
+  const txid = message.transaction_id
+	const accountId = message.id
+	const withdrawalId = message.withdrawal_id
+
+	if (message.currency === "woodcoin") {
+		try {
+	    const response = await axios(`https://api.logbin.org/api/broadcast/r?transaction=${txid}`, {
+        method: 'get',
+        headers: {
+            'Accept': 'application/json'
+        }
+      });
+      const body = response.data
+      if (body.message) {
+        const dataJson = Filesystem.readFile({
+            path: 'data/data.json',
+            directory: Directory.Documents,
+            encoding: Encoding.UTF8,
+        });
+        const accounts = dataJson.data
+        for (const [key, value] of Object.entries(accounts)) {
+            let account = value
+            console.log("account.id vs accountId: ", account.id, accountId)
+            if (account.id == accountId) {
+              console.log("inside account: ")
+              for (const [index, withdrawal] of account.withdrawals.entries()){
+                console.log("withdrawal.id vs withdrawalId: ", withdrawal.id, withdrawalId)
+                if (withdrawal.id == withdrawalId){
+                  console.log("inside withdrawal id")
+                  withdrawal.date_broadcasted = Date.now()
+                  withdrawal.txid = body.message.result
+                  console.log(withdrawal)
+                  // const updatedAccounts = JSON.stringify(accounts, null, 2)
+                  const writeAccount = Filesystem.writeFile({
+                    path: 'data/data.json',
+                    data: accounts,
+                    directory: Directory.Documents,
+                    encoding: Encoding.UTF8,
+                  });
+                  if (writeAccount.uri) {
+                    console.log("withdrawal broadcasted. record updated")
+                  } else {
+                    console.log("updating withdrawal after successful broadcasting error: ", err)
+                  }
+                }
+              }
+            }
+          }
+        withdrawalBroadcastResponse(body)
+      }
+	  } catch(e) {
+      console.log(e.response)
+	    withdrawalBroadcastResponse(e.response)
+	  }
+	} else if (message.currency === "bitcoin" || message.currency === "litecoin") {
+		let chain = message.currency === "bitcoin" ? "BTC" : "LTC";
+		try {
+			
+      const response = await axios(`https://chain.so/api/v3/broadcast_transaction/${chain}`, {
+        method: 'post',
+        headers: {
+            'Accept': 'application/json',
+            'API-KEY': import.meta.env.VITE_API_KEY
+        },
+        data: {
+          'tx_hex' : txid
+        }
+      });
+      const resp = response.data
+      let body
+
+      if (resp.data) {
+        body = {
+          message: {
+            result: resp.data.hash
+          }
+        }
+      } else {
+        body = {
+          error : {
+            error: {
+              message: resp.error
+            }
+          }
+        }
+      }
+      if (body.message) {
+        console.log("body.message: ", body.message)
+        const dataJson = Filesystem.readFile({
+            path: 'data/data.json',
+            directory: Directory.Documents,
+            encoding: Encoding.UTF8,
+        });
+        const accounts = dataJson.data
+        for (const [key, value] of Object.entries(accounts)) {
+          let account = value
+          console.log("account.id vs accountId: ", account.id, accountId)
+          if (account.id == accountId) {
+            console.log("inside account: ")
+            for (const [index, withdrawal] of account.withdrawals.entries()){
+              console.log("withdrawal.id vs withdrawalId: ", withdrawal.id, withdrawalId)
+              if (withdrawal.id == withdrawalId){
+                console.log("inside withdrawal id")
+                withdrawal.date_broadcasted = Date.now()
+                withdrawal.txid = body.data.hash
+                console.log(withdrawal)
+                // const updatedAccounts = JSON.stringify(accounts, null, 2)
+                const writeAccount = Filesystem.writeFile({
+                  path: 'data/data.json',
+                  data: accounts,
+                  directory: Directory.Documents,
+                  encoding: Encoding.UTF8,
+                });
+                if (writeAccount.uri) {
+                  console.log("withdrawal broadcasted. record updated")
+                } else {
+                  console.log("updating withdrawal after successful broadcasting error: ", err)
+                }
+              }
+            }
+          }
+        }
+        withdrawalBroadcastResponse(body)
+      }
+	  } catch(e) {
+	    console.log("error : ", e)
+      withdrawalBroadcastResponse(e.response)
+	  }
+	} else {
+		console.log("invalid currency")
+		return
+	}
+}
+
+/* broadcast response */
+function withdrawalBroadcastResponse(res) {
+  console.log("withdrawal:broadcast-response: ", res)
+  let withdrawalSuccessResponseContainer = document.getElementById('owner-withdrawal-response-success-container')
+  let withdrawalErrorResponseContainer = document.getElementById('owner-withdrawal-response-error-container')
+
+  let withdrawalTxIdResponse = document.getElementById('owner-withdrawal-txid-response')
+  let withdrawalErrorResponse = document.getElementById('owner-withdrawal-error-response')
+
+  let broadcastButton = document.getElementById("owner-withdrawal-broadcast-button")
+  let closeButton = document.getElementById("owner-withdrawal-close-button")
+  closeButton.addEventListener('click', () => {
+    console.log("close button")
+    showImportListScreen()
+  })
+
+  if(res.message){
+    console.log("res message: ", res.message.result)
+    withdrawalSuccessResponseContainer.classList.remove('hidden')
+    withdrawalTxIdResponse.innerHTML = res.message.result
+
+    closeButton.classList.remove('hidden')
+    broadcastButton.classList.add('hidden')
+
+    /**
+      Update the account details with the withdrawal transaction
+    */
+
+  } else {
+    console.log(res.error.error.message)
+    withdrawalErrorResponseContainer.classList.remove('hidden')
+    withdrawalErrorResponse.innerHTML = res.error.error.message
+
+    closeButton.classList.remove('hidden')
+    broadcastButton.classList.add('hidden')
+  }
+}
+
+/* response banker signature from import text */
+async function responseBankerSignture(data) {
+  const account = data.account
+  const message = data.message
+
+  console.log("message: ", message)
+  console.log("message.withdrawal_id: ", message.withdrawal_id)
+  // Loop thru the account withdrawal array And
+  // get the list of bankers that already signed
+  const bankers = account.bankers
+  let acctWithdrawal
+  let signedBankers = []
+
+  for (const [index, withdrawal] of account.withdrawals.entries()) {
+    console.log("withdrawal.id: ", typeof(withdrawal.id))
+    if (withdrawal.id === Number(message.withdrawal_id)) {
+      console.log("withdrawal: ", withdrawal)
+      let sx = withdrawal.signatures
+      for (const [index, signature] of sx.entries()) {
+        console.log("signature: ", signature)
+        if (signature.status === "SIGNED") {
+          signedBankers.push(signature)
+        }
+      }
+    }
+  }
+  console.log("signedBankers: ", typeof(signedBankers))
+  console.log("signedBankers: ", signedBankers)
+  const bankersArray = bankers.filter((elem) => !signedBankers.find((banker) => elem.banker_id === banker.banker_id));
+
+  let selectNextBankerScreen = document.getElementById('request-sig-next-banker-select')
+  selectNextBankerScreen.classList.remove('hidden')
+  importArea.classList.add('hidden')
+
+  //
+  // Start of Signed Banker's table
+  //
+  const bankersBody = document.getElementById('signed-bankers-list-body')
+
+  bankersBody.innerHTML = ""
+  for(let x in signedBankers) {
+      if(signedBankers.hasOwnProperty(x)){
+          let signedTx = slicePubkey(signedBankers[x].transaction_id)
+          let row = bankersBody.insertRow();
+          let name = row.insertCell(0);
+          name.innerHTML = signedBankers[x].banker_name
+          let dateSigned = row.insertCell(1);
+          let ds = signedBankers[x].date_signed
+          dateFormat = ds.toDateString()
+          dateSigned.innerHTML = dateFormat
+          let signature = row.insertCell(2);
+          signature.innerHTML = signedTx
+      }
+  }
+  //
+  // End of Banker's table
+  //
+
+
+  let selectBankers = document.getElementById("next-banker-to-sign-container")
+  var select =  document.getElementById("select-next-bankers-to-sign");
+  select.innerHTML = ''
+  select.dataset.placeholder = 'Choose Bankers'
+
+  const el = document.createElement("option");
+  el.textContent = "Select a banker";
+  el.value = "";
+  select.appendChild(el);
+  bankersArray.forEach((banker, i) => {
+    const opt = banker.banker_email;
+    const pub = banker.pubkey;
+    const el = document.createElement("option");
+    el.textContent = opt;
+    el.value = JSON.stringify(banker);
+    select.appendChild(el);
+  });
+
+  let generateBtn = document.getElementById('generate-next-sign-message')
+  generateBtn.addEventListener('click', () => {
+    const banker = select.options[select.selectedIndex].value;
+    console.log("banker: ", banker)
+
+    if (banker) {
+      // let parsedBanker = JSON.parse(banker)
+      // ipcRenderer.send("owner:save-next-banker", {account, message, parsedBanker})
+      const optiondata = {
+        account,
+        message,
+        banker
+      }
+      ownerSaveNextBanker(optiondata)
+    } else {
+      alertError("Please select a banker.")
+    }
+  })
+}
+
+/* owner save data next banker */
+async function ownerSaveNextBanker(data) {
+  let account = data.account
+	let message = data.message
+	let next_banker = data.banker
+
+	console.log("data: ", data)
+  const bankerCheckResult = await readdir('data.json');
+	if (bankerCheckResult) {
+    const dataJson = Filesystem.readFile({
+      path: 'data/data.json',
+      directory: Directory.Documents,
+      encoding: Encoding.UTF8,
+  });
+    const accounts = dataJson.data
+
+		for (const [key, value] of Object.entries(accounts)) {
+      let acct = value
+      if (acct.id == account.id) {
+				for (const [index, withdrawal] of acct.withdrawals.entries()){
+					if (withdrawal.id == message.withdrawal_id){
+
+					  let newMessage = {
+					    "header": "free_state_central_bank",
+					    "message":"request-signature",
+					    "id": message.id,
+					    "contract_name": message.contract_name,
+					    "banker_id": next_banker.banker_id,
+					    "creator_name": message.creator_name,
+					    "creator_email": message.creator_email,
+					    "banker_name": next_banker.banker_name,
+					    "banker_email": next_banker.banker_email,
+					    "transaction_id_for_signature": message.transaction_id,
+					    "currency": message.currency,
+							"withdrawal_id": message.withdrawal_id,
+					  }
+					  console.log("new message: ", newMessage)
+
+					  // Create new signature object in the account signature array
+					  const newSignatory = {
+					    "banker_id": next_banker.banker_id,
+							"banker_name": next_banker.banker_name,
+					    "date_requested": Date.now(),
+					    "date_signed": null,
+					    "status": "PENDING",
+					    "transaction_id": "",
+							"action": "Request for signature"
+					  }
+					  withdrawal.signatures.push(newSignatory)
+
+					  // const accountsNewSignatory = JSON.stringify(accounts, null, 2)
+					  // fs.writeFile(homedir + "/data/data.json"
+					  //   , accountsNewSignatory, function writeJson(err) {
+					  //   if (err)  {
+					  //     console.log("updating signatures for next banker to sign error: ", err)
+					  //   } else {
+					  //     console.log("signature updated for next banker to sign: ")
+					  //     win.webContents.send('owner:show-banker-signature-message', newMessage)
+					  //   }
+					  // })
+            const writeAccount = Filesystem.writeFile({
+                path: 'data/data.json',
+                data: accounts,
+                directory: Directory.Documents,
+                encoding: Encoding.UTF8,
+            });
+            if (writeAccount.uri) {
+              ownerShowBankerSignatureMessage(newMessage)
+            }
+
+					}
+				}
+			}
+		}
+	}
+}
+
+/* show user message signature to be send on banker */
+async function ownerShowBankerSignatureMessage(message) {
+  alertSuccess("Banker signature successfully updated.")
+
+  ownerMessageSignRequest.classList.remove('hidden')
+  let selectNextBankerScreen = document.getElementById('request-sig-next-banker-select')
+  selectNextBankerScreen.classList.add('hidden')
+
+  let ownerMessageSignRequestBody = document.getElementById('owner-message-sign-request-body')
+  let signResponseTitle = document.getElementById('sign-request-title')
+  let buttonDiv = document.getElementById('owner-message-sign-request-close-button')
+  const div = document.createElement('div')
+  div.setAttribute('class', 'bg-white p-3 rounded-md text-black')
+
+  const p1 = document.createElement('p')
+  const p2 = document.createElement('p')
+  const p3 = document.createElement('p')
+  const p4 = document.createElement('pre')
+  const p5 = document.createElement('p')
+
+  ownerMessageSignRequestBody.innerHTML = ''
+
+  signResponseTitle.innerHTML = "Please copy the line below and send it to " + message.banker_email;
+  p1.innerHTML = USER.user_name + " is requesting for a withdrawal transaction from " + message.contract_name;
+  p2.innerHTML = "Please copy the message inside and import in FSCB";
+  p3.innerHTML = "-----Begin fscb message-----";
+  p4.innerHTML = JSON.stringify(message, undefined, 2);
+  p5.innerHTML = "-----End fscb message-----";
+
+  const copyToClipboardText = p1.innerHTML + '\n' + p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML
+  let copyButton = document.createElement('img')
+  copyButton.setAttribute('src', './assets/imgs/copy_button.png')
+  copyButton.setAttribute('width', '50')
+  copyButton.setAttribute('height', '50')
+  copyButton.setAttribute('class', 'inline-flex absolute right-10 px-4 cursor-pointer hover:scale-125 transition duration-500')
+  copyButton.addEventListener("click", async function() {
+    await Clipboard.write({
+      string: copyToClipboardText
+    });
+    alertSuccess("Message successfully copied in clipboard.")
+  }, false);
+
+  div.appendChild(copyButton)
+
+  p1.classList.add('my-1')
+  p4.classList.add('whitespace-pre-wrap', 'break-all')
+  div.appendChild(p1)
+  div.appendChild(p2)
+  div.appendChild(p3)
+  div.appendChild(p4)
+  div.appendChild(p5)
+
+  ownerMessageSignRequestBody.appendChild(div)
+
+
+  let closeButton = document.createElement('button')
+  closeButton.classList.add("inline-flex", "items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "absolute", "right-5", "mt-5", "text-white", "bg-orange-500", "rounded-lg", "focus:ring-4", "focus:ring-blue-200", "dark:focus:ring-orange-500", "hover:bg-orange-500")
+  closeButton.innerHTML = "Close"
+  closeButton.addEventListener("click", function() {
+    // bankerForm.classList.remove('hidden')
+    // bankersList.classList.remove('hidden')
+    // bankerMessage.classList.add('hidden')
+    importArea.classList.remove('hidden')
+    ownerMessageSignRequest.classList.add('hidden')
+    importText.value = ""
+
+    showImportListScreen()
+    console.log("close sign request message")
+  }, false);
+
+  buttonDiv.appendChild(closeButton)
+}
+
+/* request banker signature */
+async function bankerSignatureRequest (message) {
+  importArea.classList.add('hidden')
+  bankerVerifyWithdrawal.classList.remove('hidden')
+
+  let inputsTable = document.getElementById('banker-verify-inputs')
+  let outputsTable = document.getElementById('banker-verify-outputs')
+
+  let coin_js
+  if (message.currency === "woodcoin") {
+    coin_js = coinjs
+  } else if (message.currency === "bitcoin") {
+    coin_js = bitcoinjs
+  } else if (message.currency === "litecoin") {
+    coin_js = litecoinjs
+  } else {
+    console.log("invalid currency")
+  }
+  const tx = coin_js.transaction()
+  const deserializeTx = tx.deserialize(message.transaction_id_for_signature)
+  console.log("deserialize tx: ", deserializeTx)
+
+  let inputs = deserializeTx.ins
+  let outputs = deserializeTx.outs
+
+  for (let i = 0; i < inputs.length; i++) {
+    var s = deserializeTx.extractScriptKey(i);
+    let input = inputs[i]
+    console.log("s: ", s.script)
+    console.log("N: ", input.outpoint.index)
+    console.log(input.outpoint.hash)
+    let inputs1 = document.createElement('input')
+    inputs1.setAttribute('readonly', true)
+    inputs1.setAttribute('class', 'md:flex px-3 bg-gray-300 text-black h-10 left-96 py-2 w-96');
+    inputs1.value = input.outpoint.hash
+    let row = inputsTable.insertRow();
+    let txid = row.insertCell(0);
+    // txid.innerHTML = input.outpoint.hash
+    txid.appendChild(inputs1)
+    txid.setAttribute('width', '45%')
+    let inputs2 = document.createElement('input')
+    inputs2.setAttribute('readonly', true)
+    inputs2.setAttribute('class', 'text-black text-center');
+    inputs2.value = input.outpoint.index
+    let indexNo = row.insertCell(1);
+    indexNo.setAttribute('class', 'text-center bg-white text-black font-semibold')
+    indexNo.innerHTML = input.outpoint.index
+    // indexNo.appendChild(inputs2)
+    indexNo.setAttribute('width', '10%')
+    let inputs3 = document.createElement('input')
+    inputs3.setAttribute('readonly', true)
+    inputs3.setAttribute('class', 'md:flex bg-gray-300 pl-1 h-10 text-black px-3 py-2 w-full');
+    inputs3.value = s.script
+    let script = row.insertCell(2);
+    // script.innerHTML = s.script
+    script.appendChild(inputs3)
+    script.setAttribute('width', '45%')
+  }
+
+  for (let i = 0; i < outputs.length; i++) {
+
+    let output = outputs[i]
+      console.log("output: ", output)
+    if(output.script.chunks.length==2 && output.script.chunks[0]==106){ // OP_RETURN
+
+      var data = Crypto.util.bytesToHex(output.script.chunks[1]);
+      var dataascii = hex2ascii(data);
+
+      if(dataascii.match(/^[\s\d\w]+$/ig)){
+        data = dataascii;
+      }
+      console.log("address: ", data)
+      console.log("amount: ", (output.value/100000000).toFixed(8))
+      console.log("script: ", Crypto.util.bytesToHex(output.script.buffer))
+      let row = outputsTable.insertRow();
+      let address = row.insertCell(0);
+      address.innerHTML = data
+      address.setAttribute('width', '45%')
+      let amount = row.insertCell(1);
+      amount.innerHTML = (output.value/100000000).toFixed(8)
+      amount.setAttribute('width', '10%')
+      let script = row.insertCell(2);
+      script.innerHTML = Crypto.util.bytesToHex(output.script.buffer)
+      script.setAttribute('width', '45%')
+    } else {
+
+      var addr = '';
+      if(output.script.chunks.length==5){
+        addr = coin_js.scripthash2address(Crypto.util.bytesToHex(output.script.chunks[2]));
+      } else if((output.script.chunks.length==2) && output.script.chunks[0]==0){
+        addr = coin_js.bech32_encode(coin_js.bech32.hrp, [coin_js.bech32.version].concat(coin_js.bech32_convert(output.script.chunks[1], 8, 5, true)));
+      } else {
+        var pub = coin_js.pub;
+        coin_js.pub = coin_js.multisig;
+        addr = coin_js.scripthash2address(Crypto.util.bytesToHex(output.script.chunks[1]));
+        coinjs.pub = pub;
+      }
+
+      console.log("address: ", addr)
+      console.log("amount: ", (output.value/100000000).toFixed(8))
+      console.log("script: ", Crypto.util.bytesToHex(output.script.buffer))
+      let row = outputsTable.insertRow();
+      let address = row.insertCell(0);
+      address.setAttribute('width', '45%')
+      address.innerHTML = addr
+      let amount = row.insertCell(1);
+      amount.innerHTML = (output.value/100000000).toFixed(8)
+      amount.setAttribute('width', '10%')
+      let script = row.insertCell(2);
+      script.innerHTML = Crypto.util.bytesToHex(output.script.buffer)
+      script.setAttribute('width', '45%')
+    }
+  }
+
+  let signButton = document.getElementById("banker-sign-button")
+  signButton.addEventListener('click', () => {
+
+    let pk = document.getElementById('banker-pivkey-for-signature')
+    let privkey = pk.value
+    // console.log("pk: ", privkey)
+    // console.log("is valid: ", isKeyValid(privkey))
+    if (privkey) {
+        if (isWifKeyValid(privkey)) {
+        bankerSignTransaction(message, privkey)
+        } else {
+          alertError('The text you entered is not a valid private key.')
+        }
+    } else {
+      alertError('Please enter your private key for this account.')
+    }
+
+  })
+}
+
+function bankerSignTransaction(message, privkey) {
+  console.log("sign tx: ", message.transaction_id_for_signature)
+  console.log("user privkey: ", privkey)
+
+
+  let tx
+  if (message.currency === "woodcoin") {
+    tx = coinjs.transaction()
+  } else if (message.currency === "bitcoin") {
+    tx = bitcoinjs.transaction()
+  }  else if (message.currency === "litecoin") {
+    tx = litecoinjs.transaction()
+  }
+
+  const scriptToSign = tx.deserialize(message.transaction_id_for_signature)
+  signedTX = scriptToSign.sign(privkey, 1)
+
+  console.log("signed: ", signedTX)
+
+  bankerVerifyWithdrawal.classList.add('hidden')
+  bankerMessageSignTx.classList.remove('hidden')
+
+  let bankerMessageSignTxBody = document.getElementById('banker-message-signtx-body')
+  let signResponseTitle = document.getElementById('sign-response-title')
+  let buttonDiv = document.getElementById('banker-message-signtx-close-button')
+  const div = document.createElement('div')
+  div.setAttribute('class', 'bg-white p-3 rounded-md text-black')
+
+  const p1 = document.createElement('p')
+  const p2 = document.createElement('p')
+  const p3 = document.createElement('p')
+  const p4 = document.createElement('pre')
+  const p5 = document.createElement('p')
+
+  delete message.transaction_id_for_signature
+  message.message = "response-signature-" + message.banker_id
+  message.transaction_id = signedTX
+
+  bankerMessageSignTxBody.innerHTML = ''
+
+  signResponseTitle.innerHTML = "Please copy the line below and send it to " + message.creator_email;
+  p1.innerHTML = USER.user_name + " response for your withdrawal signature request for " + message.contract_name;
+  p2.innerHTML = "Please copy the message inside and import in FSCB";
+  p3.innerHTML = "-----Begin fscb message-----";
+  p4.innerHTML = JSON.stringify(message, undefined, 2);
+  p5.innerHTML = "-----End fscb message-----";
+
+  const copyToClipboardText = p1.innerHTML + '\n' + p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML
+  let copyButton = document.createElement('img')
+  copyButton.setAttribute('src', './assets/imgs/copy_button.png')
+  copyButton.setAttribute('width', '50')
+  copyButton.setAttribute('height', '50')
+  copyButton.setAttribute('class', 'inline-flex absolute right-10 px-4 cursor-pointer hover:scale-125 transition duration-500')
+  copyButton.addEventListener("click", async function() {
+    // ipcRenderer.send('message:copy', copyToClipboardText)
+    await Clipboard.write({
+      string: copyToClipboardText
+    });
+    alertSuccess("Message successfully copied in clipboard.")
+  }, false);
+
+  div.appendChild(copyButton)
+
+  p1.classList.add('my-1')
+  p4.classList.add('whitespace-pre-wrap', 'break-all')
+  div.appendChild(p1)
+  div.appendChild(p2)
+  div.appendChild(p3)
+  div.appendChild(p4)
+  div.appendChild(p5)
+
+  bankerMessageSignTxBody.appendChild(div)
+
+
+  let closeButton = document.createElement('button')
+  closeButton.classList.add("inline-flex", "items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "absolute", "right-5", "mt-5", "text-white", "bg-orange-500", "rounded-lg", "focus:ring-4", "focus:ring-blue-200", "dark:focus:ring-orange-500", "hover:bg-orange-500")
+  closeButton.innerHTML = "Close"
+  closeButton.addEventListener("click", function() {
+    console.log("close sign response message")
+
+    importArea.classList.remove('hidden')
+    bankerMessageSignTx.classList.add('hidden')
+    importText.value = ""
+    bankerMessageSignTxBody.innerHTML = ""
+
+    // Clear verify withdrawal inputs
+    let inputsTable = document.getElementById('banker-verify-inputs')
+    let outputsTable = document.getElementById('banker-verify-outputs')
+    let userPrivKey = document.getElementById('banker-pivkey-for-signature')
+
+    inputsTable.innerHTML = ""
+    outputsTable.innerHTML = ""
+    userPrivKey.value = ""
+
+    showImportListScreen()
+  }, false);
+
+  buttonDiv.appendChild(closeButton)
+};
 
 /* request banker pubkey */
 async function bankerPukey(message) {
@@ -1497,8 +2271,8 @@ async function bankerPukey(message) {
     } else {
       return
     }
-    coinjs.compressed = true
-    const userAddress = await coinjs.newKeys()
+    coin_js.compressed = true
+    const userAddress = await coin_js.newKeys()
     console.log(userAddress)
 
     let privkeyHexInput = document.getElementById('pivkey-hex')
@@ -1524,8 +2298,8 @@ async function bankerPukey(message) {
         return
       }
 
-      coinjs.compressed = true
-      const newKeys = await coinjs.newKeysFromHex(updatedHex)
+      coin_js.compressed = true
+      const newKeys = await coin_js.newKeysFromHex(updatedHex)
 
       privkeyHexInput.value = newKeys.privkey
       privkeyWifInput.value = newKeys.wif
@@ -1584,8 +2358,11 @@ function finalizeNewKeys(evt){
     let copyButton = document.createElement('img')
     copyButton.setAttribute('src', './assets/imgs/copy_button.png')
     copyButton.setAttribute('class', 'inline-flex absolute right-10 px-2 cursor-pointer hover:scale-125 transition duration-500')
-    copyButton.addEventListener("click", function() {
-      navigator.clipboard.writeText(copyToClipboardText)
+    copyButton.addEventListener("click", async function() {
+      // navigator.clipboard.writeText(copyToClipboardText)
+      await Clipboard.write({
+        string: copyToClipboardText
+      });
       alertSuccess("Message successfully copied in clipboard.")
     }, false);
 
@@ -2378,7 +3155,7 @@ function closeSendSignatureScreen() {
     const p13 = document.createElement('p')
     p13.innerHTML = '"transaction_id_for_signature":' + '"' + tx + '",'
     const p14 = document.createElement('p')
-    p14.innerHTML = '"currency":' + '"' + accountParse[0].currency + '"}'
+    p14.innerHTML = '"currency":' + '"' + accountParse[0].currency + '",'
     const p15 = document.createElement('p')
     p15.innerHTML = '"contract_name":' + '"' + accountParse[0].contract_name + '",'
     const p16 = document.createElement('p')
@@ -2389,12 +3166,15 @@ function closeSendSignatureScreen() {
     const copyToClipboardText = p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML + '\n' + p6.innerHTML + '\n' + p7.innerHTML + '\n' + p8.innerHTML + '\n' + p9.innerHTML + '\n' + p10.innerHTML + '\n' + p11.innerHTML + '\n' + p12.innerHTML + '\n' + p13.innerHTML + '\n' + p14.innerHTML + '\n' + p15.innerHTML
     + '\n' + p16.innerHTML + '\n' + p17.innerHTML
     let copyButton = document.createElement('img')
-    copyButton.setAttribute('src', './images/copy_button.png')
+    copyButton.setAttribute('src', './assets/imgs/copy_button.png')
     copyButton.setAttribute('width', '50')
     copyButton.setAttribute('height', '50')
     copyButton.setAttribute('class', 'inline-flex absolute right-10 px-4 cursor-pointer hover:scale-125 transition duration-500')
-    copyButton.addEventListener("click", function() {
-      ipcRenderer.send('message:copy', copyToClipboardText)
+    copyButton.addEventListener("click", async function() {
+      await Clipboard.write({
+        string: copyToClipboardText
+      });
+      // ipcRenderer.send('message:copy', copyToClipboardText)
       alertSuccess("Message successfully copied in clipboard.")
     }, false);
 
@@ -2435,9 +3215,40 @@ function closeSendSignatureScreen() {
       ]
     }
     accountParse[0].withdrawals = newWithdrawal
+    console.log("account parse withdrawals ", accountParse[0])
+    const signEncode = {
+      "id": accountParse[0].contract_id, 
+      "contract": accountParse[0]
+    }
     // ipcRenderer.send('signature:encode', {"id": accountParse[0].contract_id, "contract": accountParse[0]})
     // console.log("new account parse", JSON.stringify(accountParse[0]))
+    signatureEncode(signEncode)
   }
+
+async function signatureEncode (data) {
+  const contents = await Filesystem.readFile({
+    path: 'data/data.json',
+    directory: Directory.Documents,
+    encoding: Encoding.UTF8,
+  });
+  const contentnew = contents.data
+  contentnew["contract" + data.id] = data.contract
+  // console.log("contents ", contentnew)
+  const writeAccount = Filesystem.writeFile({
+      path: 'data/data.json',
+      data: contentnew,
+      directory: Directory.Documents,
+      encoding: Encoding.UTF8,
+  });
+  if (writeAccount.uri) {
+    const readmore = await Filesystem.readFile({
+        path: 'data/data.json',
+        directory: Directory.Documents,
+        encoding: Encoding.UTF8,
+      });
+    listfile(readmore)
+  }
+}
 
 formCreateAccount.addEventListener("submit", saveAndCreateText);
 importTextForm.addEventListener('submit', parseTextArea);
