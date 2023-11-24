@@ -35,7 +35,7 @@ let secondTab = document.getElementById('second')
 let addBankerTab = document.getElementById('addbanker')
 let thirdTab = document.getElementById('third')
 let fourthTab = document.getElementById('fourth')
-let fifthTab = document.getElementById('fifth')
+let fifthTab = document.getElementById('sixth')
 
 // /**
 //   Import Text screen
@@ -1980,6 +1980,8 @@ async function ownerShowBankerSignatureMessage(message) {
   p5.innerHTML = "-----End fscb message-----";
 
   const copyToClipboardText = p1.innerHTML + '\n' + p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML
+  let copyButtonContainer = document.createElement('div')
+  copyButtonContainer.setAttribute('class', 'flex justify-end')
   let copyButton = document.createElement('img')
   copyButton.setAttribute('src', './assets/imgs/copy_button.png')
   copyButton.setAttribute('width', '50')
@@ -1992,7 +1994,8 @@ async function ownerShowBankerSignatureMessage(message) {
     alertSuccess("Message successfully copied in clipboard.")
   }, false);
 
-  div.appendChild(copyButton)
+  copyButtonContainer.appendChild(copyButton)
+  div.appendChild(copyButtonContainer)
 
   p1.classList.add('my-1')
   p4.classList.add('whitespace-pre-wrap', 'break-all')
@@ -2205,20 +2208,21 @@ function bankerSignTransaction(message, privkey) {
   p5.innerHTML = "-----End fscb message-----";
 
   const copyToClipboardText = p1.innerHTML + '\n' + p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML
+
+  let copyButtonContainer = document.createElement('div')
+  copyButtonContainer.setAttribute('class', 'flex justify-end')
   let copyButton = document.createElement('img')
   copyButton.setAttribute('src', './assets/imgs/copy_button.png')
-  copyButton.setAttribute('width', '50')
-  copyButton.setAttribute('height', '50')
-  copyButton.setAttribute('class', 'inline-flex absolute right-10 px-4 cursor-pointer hover:scale-125 transition duration-500')
+  copyButton.setAttribute('class', 'px-2 cursor-pointer hover:scale-125 transition duration-500')
   copyButton.addEventListener("click", async function() {
-    // ipcRenderer.send('message:copy', copyToClipboardText)
     await Clipboard.write({
       string: copyToClipboardText
     });
     alertSuccess("Message successfully copied in clipboard.")
   }, false);
 
-  div.appendChild(copyButton)
+  copyButtonContainer.appendChild(copyButton)
+  div.appendChild(copyButtonContainer)
 
   p1.classList.add('my-1')
   p4.classList.add('whitespace-pre-wrap', 'break-all')
@@ -2232,7 +2236,7 @@ function bankerSignTransaction(message, privkey) {
 
 
   let closeButton = document.createElement('button')
-  closeButton.classList.add("inline-flex", "items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "absolute", "right-5", "mt-5", "text-white", "bg-orange-500", "rounded-lg", "focus:ring-4", "focus:ring-blue-200", "dark:focus:ring-orange-500", "hover:bg-orange-500")
+  closeButton.classList.add("items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "mt-5", "text-white", "bg-orange-500", "rounded-lg", "focus:ring-4", "focus:ring-blue-200", "dark:focus:ring-orange-500", "hover:bg-orange-500")
   closeButton.innerHTML = "Close"
   closeButton.addEventListener("click", function() {
     console.log("close sign response message")
@@ -2365,8 +2369,10 @@ function finalizeNewKeys(evt){
     let copyButton = document.createElement('img')
     copyButton.setAttribute('src', './assets/imgs/copy_button.png')
     copyButton.setAttribute('class', 'px-2 cursor-pointer hover:scale-125 transition duration-500')
-    copyButton.addEventListener("click", function() {
-      navigator.clipboard.writeText(copyToClipboardText)
+    copyButton.addEventListener("click", async function() {
+      await Clipboard.write({
+        string: copyToClipboardText
+      });
       alertSuccess("Message successfully copied in clipboard.")
     }, false);
 
@@ -3175,8 +3181,10 @@ function closeSendSignatureScreen() {
     let copyButton = document.createElement('img')
     copyButton.setAttribute('src', './assets/imgs/copy_button.png')
     copyButton.setAttribute('class', 'px-2 cursor-pointer hover:scale-125 transition duration-500')
-    copyButton.addEventListener("click", function() {
-      navigator.clipboard.writeText(copyToClipboardText)
+    copyButton.addEventListener("click", async function() {
+      await Clipboard.write({
+        string: copyToClipboardText
+      });
       alertSuccess("Message successfully copied in clipboard.")
     }, false);
 
