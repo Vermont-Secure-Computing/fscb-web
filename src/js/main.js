@@ -2198,6 +2198,7 @@ function bankerSignTransaction(message, privkey) {
   let bankerMessageSignTxBody = document.getElementById('banker-message-signtx-body')
   let signResponseTitle = document.getElementById('sign-response-title')
   let buttonDiv = document.getElementById('banker-message-signtx-close-button')
+  buttonDiv.innerHTML = ""
   const div = document.createElement('div')
   div.setAttribute('class', 'bg-white p-3 rounded-md text-black')
 
