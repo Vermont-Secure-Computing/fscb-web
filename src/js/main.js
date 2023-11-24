@@ -409,17 +409,25 @@ async function listfile(evt) {
     // console.log(evt)
     const convertToJson = evt.data
     const accountBody = document.getElementById('accounts-list-body')
+    let coinInitial;
     accountBody.innerHTML = ""
     for(let x in convertToJson) {
         if(convertToJson.hasOwnProperty(x)){
             // console.log("convert to json", convertToJson[x].contract_name)
             // ipcRenderer.send("get:balance", {"pubkey": convertToJson[x].address})
+            if (convertToJson[x].currency === 'woodcoin') {
+              coinInitial = 'LOG'
+            } else if (convertToJson[x].currency === 'bitcoin') {
+              coinInitial = 'BTC'
+            } else {
+              coinInitial = 'LTC'
+            }
             let row = accountBody.insertRow();
             let name = row.insertCell(0);
             name.setAttribute('class', 'pl-6')
             name.innerHTML = convertToJson[x].contract_name
             let address = row.insertCell(1);
-            address.innerHTML = convertToJson[x].address
+            address.innerHTML = coinInitial + ':' + convertToJson[x].address
             let balance = row.insertCell(2);
             balance.setAttribute('class', 'pl-4')
             balance.innerHTML = convertToJson[x].balance
@@ -1508,10 +1516,14 @@ async function bankerSignatureResponse(message) {
       console.log("account value ", value)
       let account = value
       if (account.id == accountID) {
+        console.log("account value ", account)
+        console.log("account withdrawals ", typeof(account.withdrawals))
 				for (const [index, withdrawal] of account.withdrawals.entries()){
 					if (withdrawal.id == message.withdrawal_id){
 			    	for (const [index, signature] of withdrawal.signatures.entries()) {
+              console.log("signature ", signature)
 				      if(signature.banker_id == bankerID) {
+                console.log("inside signature")
 				        signature.transaction_id = message.transaction_id
 				        signature.status = "SIGNED"
 				        const date_signed = new Date()
@@ -1541,12 +1553,13 @@ async function bankerSignatureResponse(message) {
 				        //     }
 				        //   }
 				        // });
-                const writeAccount = Filesystem.writeFile({
+                const writeAccount = await Filesystem.writeFile({
                     path: 'data/data.json',
                     data: accounts,
                     directory: Directory.Documents,
                     encoding: Encoding.UTF8,
                 });
+                console.log("write account ", writeAccount)
                 if (writeAccount.uri) {
                   console.log("accounts updated")
                   // check number of signatures needed
@@ -1618,7 +1631,7 @@ async function withdrawalApi(message) {
       });
       const body = response.data
       if (body.message) {
-        const dataJson = Filesystem.readFile({
+        const dataJson = await Filesystem.readFile({
             path: 'data/data.json',
             directory: Directory.Documents,
             encoding: Encoding.UTF8,
@@ -1637,7 +1650,7 @@ async function withdrawalApi(message) {
                   withdrawal.txid = body.message.result
                   console.log(withdrawal)
                   // const updatedAccounts = JSON.stringify(accounts, null, 2)
-                  const writeAccount = Filesystem.writeFile({
+                  const writeAccount = await Filesystem.writeFile({
                     path: 'data/data.json',
                     data: accounts,
                     directory: Directory.Documents,
@@ -1655,7 +1668,7 @@ async function withdrawalApi(message) {
         withdrawalBroadcastResponse(body)
       }
 	  } catch(e) {
-      console.log(e.response)
+      console.log(e)
 	    withdrawalBroadcastResponse(e.response)
 	  }
 	} else if (message.currency === "bitcoin" || message.currency === "litecoin") {
@@ -1692,7 +1705,7 @@ async function withdrawalApi(message) {
       }
       if (body.message) {
         console.log("body.message: ", body.message)
-        const dataJson = Filesystem.readFile({
+        const dataJson = await Filesystem.readFile({
             path: 'data/data.json',
             directory: Directory.Documents,
             encoding: Encoding.UTF8,
@@ -1711,7 +1724,7 @@ async function withdrawalApi(message) {
                 withdrawal.txid = body.data.hash
                 console.log(withdrawal)
                 // const updatedAccounts = JSON.stringify(accounts, null, 2)
-                const writeAccount = Filesystem.writeFile({
+                const writeAccount = await Filesystem.writeFile({
                   path: 'data/data.json',
                   data: accounts,
                   directory: Directory.Documents,
@@ -1882,7 +1895,7 @@ async function ownerSaveNextBanker(data) {
 	console.log("data: ", data)
   const bankerCheckResult = await readdir('data.json');
 	if (bankerCheckResult) {
-    const dataJson = Filesystem.readFile({
+    const dataJson = await Filesystem.readFile({
       path: 'data/data.json',
       directory: Directory.Documents,
       encoding: Encoding.UTF8,
@@ -1933,7 +1946,7 @@ async function ownerSaveNextBanker(data) {
 					  //     win.webContents.send('owner:show-banker-signature-message', newMessage)
 					  //   }
 					  // })
-            const writeAccount = Filesystem.writeFile({
+            const writeAccount = await Filesystem.writeFile({
                 path: 'data/data.json',
                 data: accounts,
                 directory: Directory.Documents,
@@ -2550,7 +2563,8 @@ async function contractnew (options) {
         "signature_nedded": options.sigSendNumber,
         "address": options.pubkeySend,
         "redeem_script": options.redeemScriptSend,
-        "signatures": [],
+        //"signatures": [],
+        "withdrawals": [],
         "balance": "0.0",
         "currency": options.coinCurrencySend,
         "claimed": "false"
@@ -3235,7 +3249,7 @@ function closeSendSignatureScreen() {
         data
       ]
     }
-    accountParse[0].withdrawals = newWithdrawal
+    accountParse[0].withdrawals.push(newWithdrawal)
     console.log("account parse withdrawals ", accountParse[0])
     const signEncode = {
       "id": accountParse[0].contract_id, 
@@ -3255,7 +3269,7 @@ async function signatureEncode (data) {
   const contentnew = contents.data
   contentnew["contract" + data.id] = data.contract
   // console.log("contents ", contentnew)
-  const writeAccount = Filesystem.writeFile({
+  const writeAccount = await Filesystem.writeFile({
       path: 'data/data.json',
       data: contentnew,
       directory: Directory.Documents,
