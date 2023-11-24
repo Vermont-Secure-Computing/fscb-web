@@ -2172,7 +2172,7 @@ function bankerSignTransaction(message, privkey) {
   }
 
   const scriptToSign = tx.deserialize(message.transaction_id_for_signature)
-  signedTX = scriptToSign.sign(privkey, 1)
+  const signedTX = scriptToSign.sign(privkey, 1)
 
   console.log("signed: ", signedTX)
 
@@ -3181,7 +3181,7 @@ function closeSendSignatureScreen() {
     }, false);
 
     copyButtonContainer.appendChild(copyButton)
-    div.appendChild(copyButtonContainer)
+    messageSignature.appendChild(copyButtonContainer)
     messageSignature.appendChild(p1)
     messageSignature.appendChild(br)
     messageSignature.appendChild(br)
