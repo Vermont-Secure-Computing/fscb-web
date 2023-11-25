@@ -125,7 +125,7 @@ window.onload = async function() {
 
       if (contractCheckResult) {
         const accounts = await Filesystem.readFile({
-            path: 'data/data.json',
+            path: 'fscb/data.json',
             directory: Directory.Documents,
             encoding: Encoding.UTF8,
           });
@@ -227,7 +227,7 @@ async function readBankersFile() {
   const bankerCheckResult = await readdir('bankers.json');
   if (bankerCheckResult) {
     const contents = await Filesystem.readFile({
-      path: 'data/bankers.json',
+      path: 'fscb/bankers.json',
       directory: Directory.Documents,
       encoding: Encoding.UTF8,
     });
@@ -245,7 +245,7 @@ async function balanceApi() {
     const contractCheckResult = await readdir('data.json');
     if (contractCheckResult) {
         const accounts = await Filesystem.readFile({
-            path: 'data/data.json',
+            path: 'fscb/data.json',
             directory: Directory.Documents,
             encoding: Encoding.UTF8,
           });
@@ -268,7 +268,7 @@ async function balanceApi() {
                       allaccount[i].balance = body.balance
 
                       const accounts = await Filesystem.readFile({
-                          path: 'data/data.json',
+                          path: 'fscb/data.json',
                           directory: Directory.Documents,
                           encoding: Encoding.UTF8,
                         });
@@ -276,14 +276,14 @@ async function balanceApi() {
                           const jdata = accounts.data
                           jdata[i] = allaccount[i]
                           const writeAccount = await Filesystem.writeFile({
-                              path: 'data/data.json',
+                              path: 'fscb/data.json',
                               data: jdata,
                               directory: Directory.Documents,
                               encoding: Encoding.UTF8,
                           });
                           if (writeAccount.uri) {
                               const readmore = await Filesystem.readFile({
-                                  path: 'data/data.json',
+                                  path: 'fscb/data.json',
                                   directory: Directory.Documents,
                                   encoding: Encoding.UTF8,
                                 });
@@ -308,7 +308,7 @@ async function balanceApi() {
             if (response.data) {
               allaccount[i].balance = body.data.confirmed
               const accounts = await Filesystem.readFile({
-                path: 'data/data.json',
+                path: 'fscb/data.json',
                 directory: Directory.Documents,
                 encoding: Encoding.UTF8,
               });
@@ -316,14 +316,14 @@ async function balanceApi() {
                 const jdata = accounts.data
                 jdata[i] = allaccount[i]
                 const writeAccount = await Filesystem.writeFile({
-                    path: 'data/data.json',
+                    path: 'fscb/data.json',
                     data: jdata,
                     directory: Directory.Documents,
                     encoding: Encoding.UTF8,
                 });
                 if (writeAccount.uri) {
                     const readmore = await Filesystem.readFile({
-                        path: 'data/data.json',
+                        path: 'fscb/data.json',
                         directory: Directory.Documents,
                         encoding: Encoding.UTF8,
                       });
@@ -346,7 +346,7 @@ async function balanceApi() {
             if (response.data) {
               allaccount[i].balance = body.data.confirmed
               const accounts = await Filesystem.readFile({
-                path: 'data/data.json',
+                path: 'fscb/data.json',
                 directory: Directory.Documents,
                 encoding: Encoding.UTF8,
               });
@@ -354,14 +354,14 @@ async function balanceApi() {
                 const jdata = accounts.data
                 jdata[i] = allaccount[i]
                 const writeAccount = await Filesystem.writeFile({
-                    path: 'data/data.json',
+                    path: 'fscb/data.json',
                     data: jdata,
                     directory: Directory.Documents,
                     encoding: Encoding.UTF8,
                 });
                 if (writeAccount.uri) {
                     const readmore = await Filesystem.readFile({
-                        path: 'data/data.json',
+                        path: 'fscb/data.json',
                         directory: Directory.Documents,
                         encoding: Encoding.UTF8,
                       });
@@ -782,7 +782,7 @@ async function writeUserData(userName, userEmail) {
           "user_email": userEmail
         }
         await Filesystem.writeFile({
-            path: 'data/user.json',
+            path: 'fscb/user.json',
             data: userData,
             directory: Directory.Documents,
             encoding: Encoding.UTF8,
@@ -894,7 +894,7 @@ async function writeBankerData(data, idNumber, nameInput, emailInput) {
         if (bankerCheckResult) {
             console.log("if write banker has been called")
             const contents = await Filesystem.readFile({
-                path: 'data/bankers.json',
+                path: 'fscb/bankers.json',
                 directory: Directory.Documents,
                 encoding: Encoding.UTF8,
               });
@@ -902,7 +902,7 @@ async function writeBankerData(data, idNumber, nameInput, emailInput) {
             contentnew["banker" + idNumber] = data
             console.log("contents ", contentnew)
             await Filesystem.writeFile({
-                path: 'data/bankers.json',
+                path: 'fscb/bankers.json',
                 data: contentnew,
                 directory: Directory.Documents,
                 encoding: Encoding.UTF8,
@@ -917,7 +917,7 @@ async function writeBankerData(data, idNumber, nameInput, emailInput) {
                 ["banker" + idNumber]: data
               }
             await Filesystem.writeFile({
-                path: 'data/bankers.json',
+                path: 'fscb/bankers.json',
                 data: addBanker,
                 directory: Directory.Documents,
                 encoding: Encoding.UTF8,
@@ -1028,7 +1028,7 @@ function showBankerRequestSend(data) {
 async function getUserData() {
   try {
     const contents = await Filesystem.readFile({
-        path: 'data/user.json',
+        path: 'fscb/user.json',
         directory: Directory.Documents,
         encoding: Encoding.UTF8,
       });
@@ -1043,7 +1043,7 @@ async function getUserData() {
 async function getBankers() {
   try {
     const contents = await Filesystem.readFile({
-        path: 'data/bankers.json',
+        path: 'fscb/bankers.json',
         directory: Directory.Documents,
         encoding: Encoding.UTF8,
       });
@@ -1056,7 +1056,7 @@ async function getBankers() {
 
 async function refreshBankersList() {
     const contents = await Filesystem.readFile({
-        path: 'data/bankers.json',
+        path: 'fscb/bankers.json',
         directory: Directory.Documents,
         encoding: Encoding.UTF8,
       });
@@ -1091,7 +1091,7 @@ async function bankersListView(evt) {
 
 async function accountBankerData() {
     const contents = await Filesystem.readFile({
-        path: 'data/bankers.json',
+        path: 'fscb/bankers.json',
         directory: Directory.Documents,
         encoding: Encoding.UTF8,
       });
@@ -1406,7 +1406,7 @@ async function idNumber() {
     try {
         if (bankerCheckResult) {
             const dataJson = Filesystem.readFile({
-                path: 'data/data.json',
+                path: 'fscb/data.json',
                 directory: Directory.Documents,
                 encoding: Encoding.UTF8,
             });
@@ -1429,7 +1429,7 @@ async function bankerIdNumber() {
     try {
         if (bankerCheckResult) {
             const dataJson = Filesystem.readFile({
-                path: 'data/bankers.json',
+                path: 'fscb/bankers.json',
                 directory: Directory.Documents,
                 encoding: Encoding.UTF8,
             });
@@ -1501,7 +1501,7 @@ async function bankerSignatureResponse(message) {
   const bankerCheckResult = await readdir('data.json');
   if (bankerCheckResult) {
     const dataJson = await Filesystem.readFile({
-        path: 'data/data.json',
+        path: 'fscb/data.json',
         directory: Directory.Documents,
         encoding: Encoding.UTF8,
     });
@@ -1554,7 +1554,7 @@ async function bankerSignatureResponse(message) {
 				        //   }
 				        // });
                 const writeAccount = await Filesystem.writeFile({
-                    path: 'data/data.json',
+                    path: 'fscb/data.json',
                     data: accounts,
                     directory: Directory.Documents,
                     encoding: Encoding.UTF8,
@@ -1632,7 +1632,7 @@ async function withdrawalApi(message) {
       const body = response.data
       if (body.message) {
         const dataJson = await Filesystem.readFile({
-            path: 'data/data.json',
+            path: 'fscb/data.json',
             directory: Directory.Documents,
             encoding: Encoding.UTF8,
         });
@@ -1651,7 +1651,7 @@ async function withdrawalApi(message) {
                   console.log(withdrawal)
                   // const updatedAccounts = JSON.stringify(accounts, null, 2)
                   const writeAccount = await Filesystem.writeFile({
-                    path: 'data/data.json',
+                    path: 'fscb/data.json',
                     data: accounts,
                     directory: Directory.Documents,
                     encoding: Encoding.UTF8,
@@ -1706,7 +1706,7 @@ async function withdrawalApi(message) {
       if (body.message) {
         console.log("body.message: ", body.message)
         const dataJson = await Filesystem.readFile({
-            path: 'data/data.json',
+            path: 'fscb/data.json',
             directory: Directory.Documents,
             encoding: Encoding.UTF8,
         });
@@ -1725,7 +1725,7 @@ async function withdrawalApi(message) {
                 console.log(withdrawal)
                 // const updatedAccounts = JSON.stringify(accounts, null, 2)
                 const writeAccount = await Filesystem.writeFile({
-                  path: 'data/data.json',
+                  path: 'fscb/data.json',
                   data: accounts,
                   directory: Directory.Documents,
                   encoding: Encoding.UTF8,
@@ -1896,7 +1896,7 @@ async function ownerSaveNextBanker(data) {
   const bankerCheckResult = await readdir('data.json');
 	if (bankerCheckResult) {
     const dataJson = await Filesystem.readFile({
-      path: 'data/data.json',
+      path: 'fscb/data.json',
       directory: Directory.Documents,
       encoding: Encoding.UTF8,
   });
@@ -1947,7 +1947,7 @@ async function ownerSaveNextBanker(data) {
 					  //   }
 					  // })
             const writeAccount = await Filesystem.writeFile({
-                path: 'data/data.json',
+                path: 'fscb/data.json',
                 data: accounts,
                 directory: Directory.Documents,
                 encoding: Encoding.UTF8,
@@ -2434,7 +2434,7 @@ async function bankerPubkeyResponse(evt) {
     const bankerCheckResult = await readdir('bankers.json');
     if (bankerCheckResult) {
       const allbankers = await Filesystem.readFile({
-        path: 'data/bankers.json',
+        path: 'fscb/bankers.json',
         directory: Directory.Documents,
         encoding: Encoding.UTF8,
       });
@@ -2456,7 +2456,7 @@ async function bankerPubkeyResponse(evt) {
         //     }
         //   })
             await Filesystem.writeFile({
-                path: 'data/bankers.json',
+                path: 'fscb/bankers.json',
                 data: allbankers.data,
                 directory: Directory.Documents,
                 encoding: Encoding.UTF8,
@@ -2538,7 +2538,7 @@ async function contractnew (options) {
     // pathMessage = 'message'
     // console.log(options.bankersMerge)
     const mybankers = await Filesystem.readFile({
-        path: 'data/bankers.json',
+        path: 'fscb/bankers.json',
         directory: Directory.Documents,
         encoding: Encoding.UTF8,
       });
@@ -2574,7 +2574,7 @@ async function contractnew (options) {
         if (contractCheckResult) {
             console.log("if write contract has been called")
             const contents = await Filesystem.readFile({
-                path: 'data/data.json',
+                path: 'fscb/data.json',
                 directory: Directory.Documents,
                 encoding: Encoding.UTF8,
               });
@@ -2582,7 +2582,7 @@ async function contractnew (options) {
             contentnew["contract" + getIdNumber] = data
             console.log("contents ", contentnew)
             await Filesystem.writeFile({
-                path: 'data/data.json',
+                path: 'fscb/data.json',
                 data: contentnew,
                 directory: Directory.Documents,
                 encoding: Encoding.UTF8,
@@ -2596,7 +2596,7 @@ async function contractnew (options) {
                 ["contract" + getIdNumber]: data
               }
             await Filesystem.writeFile({
-                path: 'data/data.json',
+                path: 'fscb/data.json',
                 data: addContract,
                 directory: Directory.Documents,
                 encoding: Encoding.UTF8,
@@ -3107,7 +3107,7 @@ async function contractnew (options) {
   async function getredeemscriptRedeemscript(options) {
     console.log("options script: ", options.script)
     const accounts = await Filesystem.readFile({
-        path: 'data/data.json',
+        path: 'fscb/data.json',
         directory: Directory.Documents,
         encoding: Encoding.UTF8,
       });
@@ -3263,7 +3263,7 @@ function closeSendSignatureScreen() {
 
 async function signatureEncode (data) {
   const contents = await Filesystem.readFile({
-    path: 'data/data.json',
+    path: 'fscb/data.json',
     directory: Directory.Documents,
     encoding: Encoding.UTF8,
   });
@@ -3271,14 +3271,14 @@ async function signatureEncode (data) {
   contentnew["contract" + data.id] = data.contract
   // console.log("contents ", contentnew)
   const writeAccount = await Filesystem.writeFile({
-      path: 'data/data.json',
+      path: 'fscb/data.json',
       data: contentnew,
       directory: Directory.Documents,
       encoding: Encoding.UTF8,
   });
   if (writeAccount.uri) {
     const readmore = await Filesystem.readFile({
-        path: 'data/data.json',
+        path: 'fscb/data.json',
         directory: Directory.Documents,
         encoding: Encoding.UTF8,
       });
