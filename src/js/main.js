@@ -50,8 +50,7 @@ let bankerGeneratePrivkey = document.getElementById('banker-privkey-generation')
 let openTab
 
 let tabsContainer = document.querySelector("#tabs");
-
-let tabTogglers = tabsContainer.querySelectorAll("#tabs a");
+let tabTogglers = document.querySelectorAll("#tabs a, #mobileTabs a");
 
 /**
   Withdrawal screen
@@ -111,11 +110,15 @@ window.onload = async function() {
       if (!userDataExist) {
         //console.log("should show user profile form")
         const userProfile = document.getElementById('user-profile')
-        const aside = document.getElementById('aside')
-        const tabsContent = document.getElementById('tab-contents')
+        const mainContainer = document.getElementById("main-container")
+        const mobileHeader = document.getElementById('mobile-header')
+        // const aside = document.getElementById('aside')
+        // const tabsContent = document.getElementById('tab-contents')
         userProfile.classList.remove('hidden')
-        aside.classList.add('hidden')
-        tabsContent.classList.add('hidden')
+        mainContainer.classList.add('hidden')
+        mobileHeader.classList.add('hidden')
+        // aside.classList.add('hidden')
+        // tabsContent.classList.add('hidden')
       } else {
         USER = await getUserData()
         //console.log("USER: ", USER)
@@ -138,7 +141,6 @@ window.onload = async function() {
 tabTogglers.forEach(function(toggler) {
     toggler.addEventListener("click", function(e) {
         e.preventDefault();
-        console.log('click button')
         importTextTab.classList.add('hidden')
         let tabName = this.getAttribute("href");
         openTab = tabName;
@@ -665,7 +667,7 @@ async function accountWithdrawalFunc(address){
   function getTotalWithdrawalAmt() {
     const getuserinput = document.querySelectorAll('#address-keys')
     let totalOutput = 0
-  
+
     for (let i = 0; i < getuserinput.length; i++) {
       let amount = getuserinput[i].children[1].value
       totalOutput += Number(amount)
@@ -794,11 +796,15 @@ async function writeUserData(userName, userEmail) {
 
         USER = userData
         const userProfile = document.getElementById('user-profile')
-        const aside = document.getElementById('aside')
-        const tabsContent = document.getElementById('tab-contents')
+        const mainContainer = document.getElementById('main-container')
+        const mobileHeader = document.getElementById('mobile-header')
+        // const aside = document.getElementById('aside')
+        // const tabsContent = document.getElementById('tab-contents')
         userProfile.classList.add('hidden')
-        aside.classList.remove('hidden')
-        tabsContent.classList.remove('hidden')
+        mainContainer.classList.remove('hidden')
+        mobileHeader.classList.remove('hidden')
+        // aside.classList.remove('hidden')
+        // tabsContent.classList.remove('hidden')
         alertSuccess("Profile has successfully been created")
 
     } catch (e) {
@@ -1171,7 +1177,7 @@ async function accountBankerData() {
 
     select.parentElement.append(newSelect);
     span.appendChild(select);
-    
+
     document.querySelector('.selectMultiple ul').addEventListener('click', (e) => {
         let li = e.target.closest('li');
         if(!li){return;}
@@ -1674,7 +1680,7 @@ async function withdrawalApi(message) {
 	} else if (message.currency === "bitcoin" || message.currency === "litecoin") {
 		let chain = message.currency === "bitcoin" ? "BTC" : "LTC";
 		try {
-			
+
       const response = await axios(`https://chain.so/api/v3/broadcast_transaction/${chain}`, {
         method: 'post',
         headers: {
@@ -2629,6 +2635,8 @@ async function contractnew (options) {
 
   function updateAccountListScreen(accounts) {
     const accountBody = document.getElementById('accounts-list-body')
+    const mobileAccountTableHead = document.getElementById('mobile-account-list-head')
+    const mobileAccountTableBody = document.getElementById('mobile-account-list-body')
     let coinInitial;
 
     accountBody.innerHTML = ""
@@ -2660,6 +2668,55 @@ async function contractnew (options) {
             let details = accounts[x]
             viewAccountDetailsButton.addEventListener("click", function() {getAccountDetails(details);}, false);
 
+
+            /**
+              Mobile view account list
+            **/
+            let headtr = document.createElement('tr')
+            headtr.setAttribute("class", "bg-teal-400 flex flex-col flex-no wrap sm:table-row rounded-l-lg sm:rounded-none mb-2 sm:mb-0")
+            let headth1 = document.createElement('th')
+            headth1.setAttribute("class", "p-3 text-left")
+            headth1.innerHTML = "Account Name"
+            let headth2 = document.createElement('th')
+            headth2.setAttribute("class", "p-3 text-left")
+            headth2.innerHTML = "Address"
+            let headth3 = document.createElement('th')
+            headth3.setAttribute("class", "p-3 text-left")
+            headth3.innerHTML = "Balance"
+            let headth4 = document.createElement('th')
+            headth4.setAttribute("class", "p-3 text-left")
+            headth4.innerHTML = "Actions"
+            headtr.appendChild(headth1)
+            headtr.appendChild(headth2)
+            headtr.appendChild(headth3)
+            headtr.appendChild(headth4)
+            mobileAccountTableHead.appendChild(headtr)
+
+            let bodytr = document.createElement('tr')
+            bodytr.setAttribute("class", "flex flex-col flex-no wrap sm:table-row mb-2 sm:mb-0")
+            let bodytd1 = document.createElement('td')
+            bodytd1.setAttribute("class", "border-grey-light border hover:bg-gray-100 p-3")
+            bodytd1.innerHTML = accounts[x].contract_name
+            let bodytd2 = document.createElement('td')
+            bodytd2.setAttribute("class", "border-grey-light border hover:bg-gray-100 p-3")
+            bodytd2.innerHTML = coinInitial + ':' + accounts[x].address
+            let bodytd3 = document.createElement('td')
+            bodytd3.setAttribute("class", "border-grey-light border hover:bg-gray-100 p-3")
+            bodytd3.innerHTML = accounts[x].balance
+            let bodytd4 = document.createElement('td')
+            bodytd4.setAttribute("class", "border-grey-light border hover:bg-gray-100 p-3")
+
+            let mobileViewAccountDetailsButton = document.createElement('button')
+            mobileViewAccountDetailsButton.setAttribute('class', "px-5 py-0.5 font-small text-white bg-orange-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500 rounded-full")
+            mobileViewAccountDetailsButton.innerHTML = "view"
+            let mobileDetails = accounts[x]
+            mobileViewAccountDetailsButton.addEventListener("click", function() {getAccountDetails(mobileDetails);}, false);
+
+            bodytr.appendChild(bodytd1)
+            bodytr.appendChild(bodytd2)
+            bodytr.appendChild(bodytd3)
+            bodytr.appendChild(mobileViewAccountDetailsButton)
+            mobileAccountTableBody.appendChild(bodytr)
         }
     }
 
@@ -3065,16 +3122,16 @@ async function contractnew (options) {
     accountActions.classList.add('hidden')
     withdrawalReference.classList.add('hidden')
     reqBankersSelect.classList.remove('hidden')
-  
+
     const accountParse = account
-  
+
     let selectBankers = document.getElementById("next-banker-to-sign")
     var select =  document.getElementById("select-bankers-to-sign");
     select.innerHTML = ''
     select.dataset.placeholder = 'Choose Bankers'
-  
+
     let bankersArray = accountParse[0].bankers
-  
+
     const el = document.createElement("option");
     el.textContent = "Select a banker";
     el.value = "";
@@ -3087,13 +3144,13 @@ async function contractnew (options) {
       el.value = JSON.stringify(banker);
       select.appendChild(el);
     });
-  
+
     let generateBtn = document.getElementById('generate-sign-message')
     generateBtn.addEventListener('click', () => {
       let selectBanker = document.getElementById('select-bankers-to-sign')
       const banker = select.options[select.selectedIndex].value;
       console.log("banker: ", banker)
-  
+
       if (banker) {
         let parsedBanker = JSON.parse(banker)
         requestSignatureWindow(tx, account, parsedBanker)
@@ -3101,7 +3158,7 @@ async function contractnew (options) {
         alertError("Please select a banker.")
       }
     })
-  
+
   }
 
   async function getredeemscriptRedeemscript(options) {
@@ -3253,7 +3310,7 @@ function closeSendSignatureScreen() {
     accountParse[0].withdrawals.push(newWithdrawal)
     console.log("account parse withdrawals ", accountParse[0])
     const signEncode = {
-      "id": accountParse[0].contract_id, 
+      "id": accountParse[0].contract_id,
       "contract": accountParse[0]
     }
     // ipcRenderer.send('signature:encode', {"id": accountParse[0].contract_id, "contract": accountParse[0]})

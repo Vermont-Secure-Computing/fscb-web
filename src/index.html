@@ -47,7 +47,7 @@
   </head>
   <body class="bg-black">
     <div class="xl:container mx-auto">
-      <!-- <div x-data="{ open: false }" class="flex flex-col max-w-screen-xl px-4 mx-auto md:items-center md:justify-between md:flex-row md:px-6 lg:px-8">
+      <div id="mobile-header" x-data="{ open: false }" class="flex flex-col max-w-screen-xl px-4 mx-auto md:hidden">
         <div class="p-4 flex flex-row items-center justify-between">
           <a href="#" ><img src="./assets/imgs/fscb_mobile.png"></a>
           <button class="md:hidden rounded-lg focus:outline-none focus:shadow-outline" @click="open = !open">
@@ -60,7 +60,7 @@
         </div>
         <nav :class="{'flex': open, 'hidden': !open}" class="flex-col flex-grow pb-4 md:pb-0 hidden md:flex md:justify-end md:flex-row">
           <ul class='list-outside list-disc ml-12 mt-8'>
-            <ul id="tabs">
+            <ul id="mobileTabs">
               <li class="list-disc marker:text-orange-500 -mt-0 px-4 text-white font-semibold text-xl py-2 rounded-t" id="account-list-tab">
                 <a class="getlistClick" href="#first">Account List</a>
               </li>
@@ -77,8 +77,9 @@
             </ul>
           </ul>
         </nav>
-      </div> -->
-      <div class="mx-auto grid h-auto grid-cols-12 border-x-2 border-x-gray-900">
+      </div>
+
+      <div class="mx-auto grid h-auto grid-cols-12 border-x-2 border-x-gray-900" id="main-container">
 
         <aside class="hidden md:block md:col-span-3 " id="aside">
           <div class="text-center">
@@ -315,14 +316,14 @@
             <!-- End of Owners view - Next banker for signature-->
 
           </div>
-          <div id="first" class="p-9 text-white font-bold text-xl leading-relaxed">
+          <div id="first" class="p-9 md:p-2 text-white font-bold text-xl leading-relaxed">
             <div id="accounts-list">
               Account list
               <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
               <div class="flex justify-end mb-3">
                 <button id="refresh-account-list" class="items-center px-4 py-1 text-sm font-medium text-center text-white bg-green-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-green-500 hover:bg-green-500">Refresh</button>
               </div>
-              <table class="relative w-full border-collapse border border-slate-400 text-left text-sm font-normal text-black bg-white left-1">
+              <table class="hidden md:block relative w-full border-collapse border border-slate-400 text-left text-sm font-normal text-black bg-white left-1">
                 <thead class="relative w-full border-b pr-2 font-medium text-black dark:border-neutral-500">
                   <tr>
                     <th scope="col" class="border border-slate-500 px-6 py-2">Account Name</th>
@@ -334,6 +335,12 @@
                 <tbody id="accounts-list-body">
                 </tbody>
               </table>
+
+              <table id="mobile-account-list" class="block md:hidden w-full flex flex-row flex-no-wrap sm:bg-white rounded-lg overflow-hidden sm:shadow-lg my-5">
+                <thead id="mobile-account-list-head" class="text-white"></thead>
+                <tbody id="mobile-account-list-body" class="flex-1 sm:flex-none"></tbody>
+              </table>
+
             </div>
             <div id="account-details" class="hidden font-normal text-base text-black bg-white h-64">
               <p class="pl-4 text-2xl font-bold">Account details</p>
