@@ -12,6 +12,7 @@ const importText =   document.getElementById('import-text');
 
 const formCreateAccount =   document.getElementById('create-new-form');
 const importTextButton = document.getElementById('import-text-button')
+const mobileImportTextButton = document.getElementById('mobile-import-text-button')
 const importTextForm = document.getElementById('import-text-form');
 const userProfileForm = document.getElementById('user-profile-form')
 const formAddBanker = document.getElementById('add-banker-form');
@@ -25,6 +26,8 @@ const minusButton = document.getElementById('address-amount');
 const withdrawalAddBtn = document.getElementById('withdrawal-plus-icon')
 const getbankerClick = document.getElementsByClassName('getbankerClick')[0]
 const getListClick = document.getElementsByClassName('getlistClick')[0]
+
+console.log("import button: ", importTextButton)
 
 /**
   Tabs container ids
@@ -3481,6 +3484,7 @@ formAddBanker.addEventListener('submit', addBanker);
 // getbankerClick.addEventListener('click', getBanker)
 // getListClick.addEventListener('click', getList)
 importTextButton.addEventListener('click', openImportTextTab)
+mobileImportTextButton.addEventListener('click', openImportTextTab)
 // getbankerClick.addEventListener('click', getBanker);
 // getListClick.addEventListener('click', getList);
 formWithdraw.addEventListener('submit', checkTxFee);
