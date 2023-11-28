@@ -48,8 +48,8 @@
   <body class="bg-black">
     <div class="xl:container mx-auto">
       <div id="mobile-header" x-data="{ open: false }" class="flex flex-col max-w-screen-xl px-4 mx-auto md:hidden">
-        <div class="p-4 flex flex-row items-center justify-between">
-          <a href="#" ><img src="./assets/imgs/fscb_mobile.png"></a>
+        <div class="py-4 flex flex-row items-center justify-between">
+          <a href="#" ><img src="./assets/imgs/fscb_mobile_text_2.png"></a>
           <button class="md:hidden rounded-lg focus:outline-none focus:shadow-outline" @click="open = !open">
             <svg fill="#ABB2B9" viewBox="0 0 20 20" class="w-6 h-6">
               <path x-show="!open" fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM9 15a1 1 0 011-1h6a1 1 0 110 2h-6a1 1 0 01-1-1z" clip-rule="evenodd"></path>
@@ -59,21 +59,22 @@
           </button>
         </div>
         <nav :class="{'flex': open, 'hidden': !open}" class="flex-col flex-grow pb-4 md:pb-0 hidden md:flex md:justify-end md:flex-row">
+          <button id="import-text-button" class="items-center px-10 py-2.5 text-base font-medium text-center text-black bg-gray-300 rounded-lg mt-8" @click="open = !open">Import Text</button>
           <ul class='list-outside list-disc ml-12 mt-8'>
             <ul id="mobileTabs">
-              <li class="list-disc marker:text-orange-500 -mt-0 px-4 text-white font-semibold text-xl py-2 rounded-t" id="account-list-tab">
+              <li class="list-disc marker:text-orange-500 -mt-0 px-4 text-white font-semibold text-xl py-2 rounded-t" id="account-list-tab" @click="open = !open">
                 <a class="getlistClick" href="#first">Account List</a>
               </li>
               <hr class="bg-gray-500 opacity-10 dark:opacity-50"/>
-              <li class="list-disc marker:text-red-500 px-4 text-white font-semibold text-xl py-2 rounded-t"><a class="getbankerClick" href="#second">New Account</a></li>
+              <li class="list-disc marker:text-red-500 px-4 text-white font-semibold text-xl py-2 rounded-t" @click="open = !open"><a class="getbankerClick" href="#second">New Account</a></li>
               <hr class="bg-gray-500 opacity-10 dark:opacity-50"/>
-              <li class="list-disc marker:text-gray-500 px-4 text-white font-semibold text-xl py-2 rounded-t"><a href="#addbanker">Add Banker</a></li>
+              <li class="list-disc marker:text-gray-500 px-4 text-white font-semibold text-xl py-2 rounded-t" @click="open = !open"><a href="#addbanker">Add Banker</a></li>
               <hr class="bg-gray-500 opacity-10 dark:opacity-50"/>
-              <li class="list-disc marker:text-green-500 px-4 text-white font-semibold text-xl py-2 rounded-t"><a href="#third">Instructions</a></li>
+              <li class="list-disc marker:text-green-500 px-4 text-white font-semibold text-xl py-2 rounded-t" @click="open = !open"><a href="#third">Instructions</a></li>
               <hr class="bg-gray-500 opacity-10 dark:opacity-50"/>
-              <li class="list-disc marker:text-purple-500 px-4 text-white font-semibold text-xl py-2 rounded-t"><a href="#fourth">About FSCB</a></li>
+              <li class="list-disc marker:text-purple-500 px-4 text-white font-semibold text-xl py-2 rounded-t" @click="open = !open"><a href="#fourth">About FSCB</a></li>
               <hr class="bg-gray-500 opacity-10 dark:opacity-50"/>
-              <li class="list-disc marker:text-gray-800 px-4 text-white font-semibold text-xl py-2 rounded-t"><a href="#sixth">Backup</a></li>
+              <li class="list-disc marker:text-gray-800 px-4 text-white font-semibold text-xl py-2 rounded-t" @click="open = !open"><a href="#sixth">Backup</a></li>
             </ul>
           </ul>
         </nav>
@@ -316,14 +317,14 @@
             <!-- End of Owners view - Next banker for signature-->
 
           </div>
-          <div id="first" class="p-9 md:p-2 text-white font-bold text-xl leading-relaxed">
+          <div id="first" class="p-3 md:p-2 text-white font-bold text-xl leading-relaxed">
             <div id="accounts-list">
               Account list
               <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
               <div class="flex justify-end mb-3">
                 <button id="refresh-account-list" class="items-center px-4 py-1 text-sm font-medium text-center text-white bg-green-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-green-500 hover:bg-green-500">Refresh</button>
               </div>
-              <table class="hidden md:block relative w-full border-collapse border border-slate-400 text-left text-sm font-normal text-black bg-white left-1">
+              <table class="hidden md:inline-table relative w-full border-collapse border border-slate-400 text-left text-sm font-normal text-black bg-white left-1">
                 <thead class="relative w-full border-b pr-2 font-medium text-black dark:border-neutral-500">
                   <tr>
                     <th scope="col" class="border border-slate-500 px-6 py-2">Account Name</th>
@@ -336,8 +337,7 @@
                 </tbody>
               </table>
 
-              <table id="mobile-account-list" class="block md:hidden w-full flex flex-row flex-no-wrap sm:bg-white rounded-lg overflow-hidden sm:shadow-lg my-5">
-                <thead id="mobile-account-list-head" class="text-white"></thead>
+              <table id="mobile-account-list" class="block md:hidden w-full flex flex-row flex-no-wrap sm:bg-white overflow-hidden sm:shadow-lg my-5">
                 <tbody id="mobile-account-list-body" class="flex-1 sm:flex-none"></tbody>
               </table>
 
@@ -539,7 +539,7 @@
               </div>
             </div>
           </div>
-          <div id="second" class="p-9 hidden text-white text-xl font-bold mt-1">
+          <div id="second" class="p-3 md:p-2 hidden text-white text-xl font-bold mt-1">
             Create Account
             <hr class="my-3 mt-4 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
             <form id="create-new-form">
@@ -619,7 +619,7 @@
 
             </form>
           </div>
-          <div id="addbanker" class="p-9 hidden text-xl text-white font-bold">
+          <div id="addbanker" class="p-3 md:p-2 hidden text-xl text-white font-bold">
             Add Banker
             <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
             <form class="mt-2" id="add-banker-form">
@@ -645,7 +645,7 @@
               <div class="mt-20">
                 <p>List of Bankers</p>
               </div>
-              <table id="bankers-list" class="relative w-full pl-96 flex-col border-collapse border border-slate-400 text-center text-sm font-light text-black bg-white mt-4">
+              <table id="bankers-list" class="hidden md:inline-table relative w-full pl-96 flex-col border-collapse border border-slate-400 text-center text-sm font-light text-black bg-white mt-4">
                 <thead class="border-b font-medium dark:border-neutral-950">
                   <tr>
                     <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-100"/>
@@ -658,11 +658,15 @@
                 <tbody class="text-black bg-white" id="bankers-list-body">
                 </tbody>
               </table>
+
+              <table id="mobile-bankers-list" class="block md:hidden w-full flex flex-row flex-no-wrap sm:bg-white overflow-hidden sm:shadow-lg my-5">
+                <tbody id="mobile-bankers-list-body" class="flex-1 sm:flex-none"></tbody>
+              </table>
             </div>
 
 
           </div>
-          <div id="third" class="p-9 hidden text-white text-xl font-bold">
+          <div id="third" class="p-3 md:p-2 hidden text-white text-xl font-bold">
             Instructions
             <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
             <div class="h-96 bg-white font-normal text-base">
@@ -672,7 +676,7 @@
              <p class="text-black px-5 absolute mt-24 font-normal text-base">Please copy the message inside and import in FSCB</p>
             </div>
           </div>
-          <div id="fourth" class="hidden p-9 text-white text-xl font-bold">
+          <div id="fourth" class="hidden p-3 md:p-2 text-white text-xl font-bold">
             About FSCB
             <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
             <div class="h-auto font-bold text-xl mt-5 bg-white">
@@ -694,7 +698,7 @@
             How it works
             <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
           </div> -->
-          <div id="sixth" class="hidden p-4 text-white text-xl font-bold">
+          <div id="sixth" class="hidden p-3 md:p-2 text-white text-xl font-bold">
             Backup
             <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
 
@@ -713,7 +717,7 @@
           </div>
         </div>
       </div>
-      <div id="user-profile" class="hidden h-screen bg-[#1a1a1a] flex justify-center items-center">
+      <div id="user-profile" class="p-3 md:p-2 hidden h-screen bg-[#1a1a1a] flex justify-center items-center">
         <form id="user-profile-form" class="text-white">
           <div class="flex justify-center">
             <img src="./assets/imgs/fscb_01.png" alt="fscb" class="mx-auto">
@@ -727,6 +731,7 @@
         </form>
       </div>
     </div>
+
     <script src="./js/main.js" type="module"></script>
   </body>
 </html>

@@ -179,16 +179,18 @@ tabTogglers.forEach(function(toggler) {
             // getUserData()
         }
         let tabContents = document.querySelector("#tab-contents");
-
+        
         for (let i = 0; i < tabContents.children.length-1; i++) {
           let tab = i + 1
-          tabTogglers[i].parentElement.classList.remove("bg-gradient-to-l", "from-gray-500");
           tabContents.children[tab].classList.remove("hidden");
           if ("#" + tabContents.children[tab].id === tabName) {
               continue;
           }
           tabContents.children[tab].classList.add("hidden");
 
+        }
+        for (let i = 0; i < tabTogglers.length-1; i++) {
+          tabTogglers[i].parentElement.classList.remove("bg-gradient-to-l", "from-gray-500");
         }
         e.target.parentElement.classList.add("bg-gradient-to-l", "from-gray-500");
     });
@@ -411,6 +413,9 @@ async function listfile(evt) {
     // console.log(evt)
     const convertToJson = evt.data
     const accountBody = document.getElementById('accounts-list-body')
+    const mobileAccountTableHead = document.getElementById('mobile-account-list-head')
+    const mobileAccountTableBody = document.getElementById('mobile-account-list-body')
+
     let coinInitial;
     accountBody.innerHTML = ""
     for(let x in convertToJson) {
@@ -442,6 +447,62 @@ async function listfile(evt) {
             //viewAccountDetailsButton.addEventListener('click', getAccountDetails)
             let details = convertToJson[x]
             viewAccountDetailsButton.addEventListener("click", function() {getAccountDetails(details);}, false);
+        
+            /**
+              Mobile view account list
+            **/
+            let bodytr1 = document.createElement('tr')
+            bodytr1.setAttribute("class", "sm:table-row mb-2 sm:mb-0 text-base font-normal")
+            let headtd1 = document.createElement('td')
+            headtd1.setAttribute("class", "border-grey-light border p-3 bg-white text-black")
+            headtd1.innerHTML = "Name"
+            let bodytd1 = document.createElement('td')
+            bodytd1.setAttribute("class", "border-grey-light border p-3")
+            bodytd1.innerHTML = convertToJson[x].contract_name
+
+            let bodytr2 = document.createElement('tr')
+            bodytr2.setAttribute("class", "sm:table-row mb-2 sm:mb-0 text-base font-normal")
+            let headtd2 = document.createElement('td')
+            headtd2.setAttribute("class", "border-grey-light border p-3 bg-white text-black")
+            headtd2.innerHTML = "Address"
+            let bodytd2 = document.createElement('td')
+            bodytd2.setAttribute("class", "break-all whitespace-normal border-grey-light border p-3")
+            bodytd2.innerHTML = coinInitial + ':' + convertToJson[x].address
+
+          
+            let bodytr3 = document.createElement('tr')
+            bodytr3.setAttribute("class", "sm:table-row mb-2 sm:mb-0 text-base font-normal")
+            let headtd3 = document.createElement('td')
+            headtd3.setAttribute("class", "border-grey-light border p-3 bg-white text-black")
+            headtd3.innerHTML = "Balance"
+            let bodytd3 = document.createElement('td')
+            bodytd3.setAttribute("class", "border-grey-light border p-3")
+            bodytd3.innerHTML = convertToJson[x].balance
+
+            let bodytr4 = document.createElement('tr')
+            bodytr4.setAttribute("class", "sm:table-row mb-2 sm:mb-0 text-base font-normal")
+            let headtd4 = document.createElement('td')
+            headtd4.setAttribute("class", "border-grey-light border p-3 bg-white text-black")
+            headtd4.innerHTML = "Actions"
+            let bodytd4 = document.createElement('td')
+            bodytd4.setAttribute("class", "border-grey-light border p-3 text-center bg-orange-600")
+            bodytd4.innerHTML = "View"
+            let mobileDetails = convertToJson[x]
+            bodytd4.addEventListener("click", function() {getAccountDetails(mobileDetails);}, false);
+
+            bodytr1.appendChild(headtd1)
+            bodytr1.appendChild(bodytd1)
+            bodytr2.appendChild(headtd2)
+            bodytr2.appendChild(bodytd2)
+            bodytr3.appendChild(headtd3)
+            bodytr3.appendChild(bodytd3)
+            bodytr4.appendChild(headtd4)
+            bodytr4.appendChild(bodytd4)
+            
+            mobileAccountTableBody.appendChild(bodytr1)
+            mobileAccountTableBody.appendChild(bodytr2)
+            mobileAccountTableBody.appendChild(bodytr3)
+            mobileAccountTableBody.appendChild(bodytr4)
         }
     }
 
@@ -962,6 +1023,7 @@ function showBankerRequestSend(data) {
     const p2 = document.createElement('p')
     const p3 = document.createElement('p')
     const p4 = document.createElement('pre')
+    p4.setAttribute("class", "whitespace-pre-wrap")
     const p5 = document.createElement('p')
 
     console.log('new banker message: ', data)
@@ -1077,6 +1139,7 @@ async function bankersListView(evt) {
     // Start of Banker's table
     //
     const bankersBody = document.getElementById('bankers-list-body')
+    const mobileBankersListBody = document.getElementById('mobile-bankers-list-body')
 
     bankersBody.innerHTML = ""
     for(let x in bankersArray) {
@@ -1091,6 +1154,64 @@ async function bankersListView(evt) {
             pubKey.innerHTML = pubkey
             let currency = row.insertCell(3)
             currency.innerHTML = bankersArray[x].currency
+
+            /**
+              Mobile view account list
+            **/
+            let bodytr1 = document.createElement('tr')
+            bodytr1.setAttribute("class", "sm:table-row sm:mb-0 text-base font-normal")
+            let headtd1 = document.createElement('td')
+            headtd1.setAttribute("class", "border-grey-light border p-3 bg-white text-black")
+            headtd1.innerHTML = "Name"
+            let bodytd1 = document.createElement('td')
+            bodytd1.setAttribute("class", "border-grey-light border p-3")
+            bodytd1.innerHTML = bankersArray[x].banker_name
+
+            let bodytr2 = document.createElement('tr')
+            bodytr2.setAttribute("class", "sm:table-row sm:mb-0 text-base font-normal")
+            let headtd2 = document.createElement('td')
+            headtd2.setAttribute("class", "border-grey-light border p-3 bg-white text-black")
+            headtd2.innerHTML = "Email"
+            let bodytd2 = document.createElement('td')
+            bodytd2.setAttribute("class", "border-grey-light border p-3")
+            bodytd2.innerHTML = bankersArray[x].banker_email
+
+          
+            let bodytr3 = document.createElement('tr')
+            bodytr3.setAttribute("class", "sm:table-row sm:mb-0 text-base font-normal")
+            let headtd3 = document.createElement('td')
+            headtd3.setAttribute("class", "border-grey-light border p-3 bg-white text-black")
+            headtd3.innerHTML = "Public key"
+            let bodytd3 = document.createElement('td')
+            bodytd3.setAttribute("class", "break-all whitespace-normal border-grey-light border p-3")
+            bodytd3.innerHTML = pubkey
+
+            let bodytr4 = document.createElement('tr')
+            bodytr4.setAttribute("class", "sm:table-row sm:mb-0 text-base font-normal")
+            let headtd4 = document.createElement('td')
+            headtd4.setAttribute("class", "border-grey-light border p-3 bg-white text-black")
+            headtd4.innerHTML = "Currency"
+            let bodytd4 = document.createElement('td')
+            bodytd4.setAttribute("class", "border-grey-light border p-3")
+            bodytd4.innerHTML = bankersArray[x].currency
+
+            let bodytr5 = document.createElement('tr')
+            bodytr5.setAttribute("height", "12px")
+
+            bodytr1.appendChild(headtd1)
+            bodytr1.appendChild(bodytd1)
+            bodytr2.appendChild(headtd2)
+            bodytr2.appendChild(bodytd2)
+            bodytr3.appendChild(headtd3)
+            bodytr3.appendChild(bodytd3)
+            bodytr4.appendChild(headtd4)
+            bodytr4.appendChild(bodytd4)
+            
+            mobileBankersListBody.appendChild(bodytr1)
+            mobileBankersListBody.appendChild(bodytr2)
+            mobileBankersListBody.appendChild(bodytr3)
+            mobileBankersListBody.appendChild(bodytr4)
+            mobileBankersListBody.appendChild(bodytr5)
         }
     }
 }
@@ -1987,6 +2108,7 @@ async function ownerShowBankerSignatureMessage(message) {
   const p2 = document.createElement('p')
   const p3 = document.createElement('p')
   const p4 = document.createElement('pre')
+  p4.setAttribute("class", "whitespace-pre-wrap")
   const p5 = document.createElement('p')
 
   ownerMessageSignRequestBody.innerHTML = ''
@@ -2672,51 +2794,58 @@ async function contractnew (options) {
             /**
               Mobile view account list
             **/
-            let headtr = document.createElement('tr')
-            headtr.setAttribute("class", "bg-teal-400 flex flex-col flex-no wrap sm:table-row rounded-l-lg sm:rounded-none mb-2 sm:mb-0")
-            let headth1 = document.createElement('th')
-            headth1.setAttribute("class", "p-3 text-left")
-            headth1.innerHTML = "Account Name"
-            let headth2 = document.createElement('th')
-            headth2.setAttribute("class", "p-3 text-left")
-            headth2.innerHTML = "Address"
-            let headth3 = document.createElement('th')
-            headth3.setAttribute("class", "p-3 text-left")
-            headth3.innerHTML = "Balance"
-            let headth4 = document.createElement('th')
-            headth4.setAttribute("class", "p-3 text-left")
-            headth4.innerHTML = "Actions"
-            headtr.appendChild(headth1)
-            headtr.appendChild(headth2)
-            headtr.appendChild(headth3)
-            headtr.appendChild(headth4)
-            mobileAccountTableHead.appendChild(headtr)
-
-            let bodytr = document.createElement('tr')
-            bodytr.setAttribute("class", "flex flex-col flex-no wrap sm:table-row mb-2 sm:mb-0")
+            let bodytr1 = document.createElement('tr')
+            bodytr1.setAttribute("class", "sm:table-row mb-2 sm:mb-0 text-base font-normal")
+            let headtd1 = document.createElement('td')
+            headtd1.setAttribute("class", "border-grey-light border p-3 bg-white text-black")
+            headtd1.innerHTML = "Name"
             let bodytd1 = document.createElement('td')
-            bodytd1.setAttribute("class", "border-grey-light border hover:bg-gray-100 p-3")
-            bodytd1.innerHTML = accounts[x].contract_name
+            bodytd1.setAttribute("class", "border-grey-light border p-3")
+            bodytd1.innerHTML = convertToJson[x].contract_name
+
+            let bodytr2 = document.createElement('tr')
+            bodytr2.setAttribute("class", "sm:table-row mb-2 sm:mb-0 text-base font-normal")
+            let headtd2 = document.createElement('td')
+            headtd2.setAttribute("class", "border-grey-light border p-3 bg-white text-black")
+            headtd2.innerHTML = "Address"
             let bodytd2 = document.createElement('td')
-            bodytd2.setAttribute("class", "border-grey-light border hover:bg-gray-100 p-3")
-            bodytd2.innerHTML = coinInitial + ':' + accounts[x].address
+            bodytd2.setAttribute("class", "break-all whitespace-normal border-grey-light border p-3")
+            bodytd2.innerHTML = coinInitial + ':' + convertToJson[x].address
+
+          
+            let bodytr3 = document.createElement('tr')
+            bodytr3.setAttribute("class", "sm:table-row mb-2 sm:mb-0 text-base font-normal")
+            let headtd3 = document.createElement('td')
+            headtd3.setAttribute("class", "border-grey-light border p-3 bg-white text-black")
+            headtd3.innerHTML = "Balance"
             let bodytd3 = document.createElement('td')
-            bodytd3.setAttribute("class", "border-grey-light border hover:bg-gray-100 p-3")
-            bodytd3.innerHTML = accounts[x].balance
+            bodytd3.setAttribute("class", "border-grey-light border p-3")
+            bodytd3.innerHTML = convertToJson[x].balance
+
+            let bodytr4 = document.createElement('tr')
+            bodytr4.setAttribute("class", "sm:table-row mb-2 sm:mb-0 text-base font-normal")
+            let headtd4 = document.createElement('td')
+            headtd4.setAttribute("class", "border-grey-light border p-3 bg-white text-black")
+            headtd4.innerHTML = "Actions"
             let bodytd4 = document.createElement('td')
-            bodytd4.setAttribute("class", "border-grey-light border hover:bg-gray-100 p-3")
+            bodytd4.setAttribute("class", "border-grey-light border p-3 text-center bg-orange-600")
+            bodytd4.innerHTML = "View"
+            let mobileDetails = convertToJson[x]
+            bodytd4.addEventListener("click", function() {getAccountDetails(mobileDetails);}, false);
 
-            let mobileViewAccountDetailsButton = document.createElement('button')
-            mobileViewAccountDetailsButton.setAttribute('class', "px-5 py-0.5 font-small text-white bg-orange-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500 rounded-full")
-            mobileViewAccountDetailsButton.innerHTML = "view"
-            let mobileDetails = accounts[x]
-            mobileViewAccountDetailsButton.addEventListener("click", function() {getAccountDetails(mobileDetails);}, false);
-
-            bodytr.appendChild(bodytd1)
-            bodytr.appendChild(bodytd2)
-            bodytr.appendChild(bodytd3)
-            bodytr.appendChild(mobileViewAccountDetailsButton)
-            mobileAccountTableBody.appendChild(bodytr)
+            bodytr1.appendChild(headtd1)
+            bodytr1.appendChild(bodytd1)
+            bodytr2.appendChild(headtd2)
+            bodytr2.appendChild(bodytd2)
+            bodytr3.appendChild(headtd3)
+            bodytr3.appendChild(bodytd3)
+            bodytr4.appendChild(headtd4)
+            bodytr4.appendChild(bodytd4)
+            
+            mobileAccountTableBody.appendChild(bodytr1)
+            mobileAccountTableBody.appendChild(bodytr2)
+            mobileAccountTableBody.appendChild(bodytr3)
+            mobileAccountTableBody.appendChild(bodytr4)
         }
     }
 
