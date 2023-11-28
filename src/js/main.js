@@ -1386,7 +1386,7 @@ function verifyIfExists(ITEM, LIST) {
 async function readdir(locFile) {
     try {
         let ret = await Filesystem.readdir({
-        path: 'data',
+        path: 'fscb',
         directory: Directory.Documents
         });
         console.log("return files", ret.files)
